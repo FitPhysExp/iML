@@ -1,3 +1,4 @@
+ï»¿//utf-8
 #include <stdio.h>
 #include <vector>
 #include <iostream>
@@ -10,7 +11,7 @@
 //	#include <Lmcons.h>
 //	#include <stdlib.h>
 
-//ŠÔo—Í—p
+//æ™‚é–“å‡ºåŠ›ç”¨
 #include <time.h>
 #include <windows.h>
 
@@ -26,7 +27,7 @@
 #endif
 */
 
-/*OpenCV 2.4.9‚Ìƒ‰ƒCƒuƒ‰ƒŠ*/
+/*OpenCV 2.4.9ã®ãƒ©ã‚¤ãƒ–ãƒ©ãƒª*/
 #ifdef _DEBUG
 #pragma comment (lib,    "opencv_core249d.lib")
 #pragma comment (lib, "opencv_imgproc249d.lib")
@@ -44,20 +45,20 @@
 
 #define FILECOUNT		250
 #define FILECOUNT_MAX   9999
-//100–‡‚Å3•b’ö“x	(30fps)	//‚±‚ê‚ğ¬‚³‚­‚µ‰ß‚¬‚é‚ÆƒvƒƒOƒ‰ƒ€‚Åg—p‚·‚é”z—ñ‚ÌƒTƒCƒY‚ª•Ï‚í‚é
-//ƒoƒbƒtƒ@ƒTƒCƒY‚ª‘«‚è‚¸Às‚Å‚«‚È‚¢‚±‚Æ‚ª‚ ‚é
+//100æšã§3ç§’ç¨‹åº¦	(30fps)	//ã“ã‚Œã‚’å°ã•ãã—éãã‚‹ã¨ãƒ—ãƒ­ã‚°ãƒ©ãƒ ã§ä½¿ç”¨ã™ã‚‹é…åˆ—ã®ã‚µã‚¤ã‚ºãŒå¤‰ã‚ã‚‹
+//ãƒãƒƒãƒ•ã‚¡ã‚µã‚¤ã‚ºãŒè¶³ã‚Šãšå®Ÿè¡Œã§ããªã„ã“ã¨ãŒã‚ã‚‹
 
 
-/* ƒOƒ[ƒoƒ‹•Ï” */
+/* ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•° */
 //	IplImage *img = 0;
-const char* FolderName = "ÀŒ±ƒtƒHƒ‹ƒ_";//ƒtƒHƒ‹ƒ_–¼
+const char* FolderName = "å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€";//ãƒ•ã‚©ãƒ«ãƒ€å
 errno_t error;
 using namespace std;
 
 void D0(void);
 void D(int K);
 
-//æ“¾ŠÖ” windows ˆË‘¶
+//æ™‚åˆ»å–å¾—é–¢æ•° windows ä¾å­˜
 #include <mmsystem.h>
 #pragma comment (lib, "winmm.lib") 
 DWORD timeGettime_Start;
@@ -90,22 +91,22 @@ char* sprintClockwPer(int i, int p){
 void fprintClock(void){
 	char strS[_MAX_PATH] = "";
 	FILE* file_s;
-	sprintf_s(strS, "%s\\”’lƒf[ƒ^\\ŠÔƒf[ƒ^.csv", FolderName);
-	//ŠÔ”’lƒf[ƒ^‚Ìì¬
+	sprintf_s(strS, "%s\\æ•°å€¤ãƒ‡ãƒ¼ã‚¿\\æ™‚é–“ãƒ‡ãƒ¼ã‚¿.csv", FolderName);
+	//æ™‚é–“æ•°å€¤ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
 	if ((error = fopen_s(&file_s, strS, "w")) != 0) {
 		printf("error\n");
 	}
 	for (int j = 0; j < Ftime_max; j++){
-		fprintf(file_s, "%lf\n", Ftime[j]);		//ŠÔ‚ğ”’lƒf[ƒ^‚Éo—Í
+		fprintf(file_s, "%lf\n", Ftime[j]);		//æ™‚é–“ã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿ã«å‡ºåŠ›
 	}
 	fclose(file_s);
-	fprintf(stderr, "ŠÔƒf[ƒ^‚ğo—Í‚µ‚Ü‚µ‚½.\n");
+	fprintf(stderr, "æ™‚é–“ãƒ‡ãƒ¼ã‚¿ã‚’å‡ºåŠ›ã—ã¾ã—ãŸ.\n");
 
 }
 int fscanClock(void){
 	FILE *file_csv;
 	char strT[_MAX_PATH] = "";
-	sprintf_s(strT, "%s\\”’lƒf[ƒ^\\ŠÔƒf[ƒ^.csv", FolderName);
+	sprintf_s(strT, "%s\\æ•°å€¤ãƒ‡ãƒ¼ã‚¿\\æ™‚é–“ãƒ‡ãƒ¼ã‚¿.csv", FolderName);
 	if (error = fopen_s(&file_csv, strT, "r") != 0){
 		printf("%s\n", strT);
 		return(-1);
@@ -127,11 +128,11 @@ int fscanClock(void){
 }
 
 #ifdef USE_OLD_VERSION__
-char winTime[FILECOUNT][20];//ƒtƒ@ƒCƒ‹—p•¶š—ñ
+char winTime[FILECOUNT][20];//ãƒ•ã‚¡ã‚¤ãƒ«æ™‚åˆ»ç”¨æ–‡å­—åˆ—
 int fscanClock0(void){
 	FILE *file_csv;
 	char strT[_MAX_PATH] = "";
-	sprintf_s(strT, "%s\\”’lƒf[ƒ^\\ŠÔƒf[ƒ^.csv", FolderName);
+	sprintf_s(strT, "%s\\æ•°å€¤ãƒ‡ãƒ¼ã‚¿\\æ™‚é–“ãƒ‡ãƒ¼ã‚¿.csv", FolderName);
 	if (error = fopen_s(&file_csv, strT, "r") != 0){
 		printf("%s\n", strT);
 		return(-1);
@@ -149,25 +150,25 @@ char* sprintClock0(int i){
 void fprintClock0(void){
 	char strS[_MAX_PATH] = "";
 	FILE* file_s;
-	sprintf_s(strS, "%s\\”’lƒf[ƒ^\\ŠÔƒf[ƒ^.csv", FolderName);
-	//ŠÔ”’lƒf[ƒ^‚Ìì¬
+	sprintf_s(strS, "%s\\æ•°å€¤ãƒ‡ãƒ¼ã‚¿\\æ™‚é–“ãƒ‡ãƒ¼ã‚¿.csv", FolderName);
+	//æ™‚é–“æ•°å€¤ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
 	if ((error = fopen_s(&file_s, strS, "w")) != 0) {
 		printf("error\n");
 	}
 
-	//Šes‚Ì‹Lq
+	//å„è¡Œã®è¨˜è¿°
 	for (int j = 0; j < FILECOUNT; j++){
-		//ƒeƒLƒXƒgì¬
-		fprintf(file_s, winTime[j]);		//ŠÔ‚ğ”’lƒf[ƒ^‚Éo—Í
-		fprintf(file_s, "\n");			//‰üs‚µ‚È‚¢‚Æ‰¡1—ñ‚É‚È‚é
+		//ãƒ†ã‚­ã‚¹ãƒˆä½œæˆ
+		fprintf(file_s, winTime[j]);		//æ™‚é–“ã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿ã«å‡ºåŠ›
+		fprintf(file_s, "\n");			//æ”¹è¡Œã—ãªã„ã¨æ¨ª1åˆ—ã«ãªã‚‹
 	}
 	fclose(file_s);
-	fprintf(stderr, "ŠÔƒf[ƒ^‚ğo—Í‚µ‚Ü‚µ‚½.\n");
+	fprintf(stderr, "æ™‚é–“ãƒ‡ãƒ¼ã‚¿ã‚’å‡ºåŠ›ã—ã¾ã—ãŸ.\n");
 }
 void saveClock0(int i){
 	SYSTEMTIME stime;
 	GetLocalTime(&stime);
-	//MS‚Éæ“¾ŠÔ‚ğ‘ã“ü
+	//MSã«å–å¾—æ™‚é–“ã‚’ä»£å…¥
 	sprintf_s(winTime[i], "%02d,%02d,%02d,%03d",
 		stime.wHour,
 		stime.wMinute,
@@ -184,7 +185,7 @@ int main(int argc, char **argv)
 	int i,  test, max = 0, M;
 	double min_val, max_val;
 	double Cmax, Cmin;
-	double config_val;//Config.txt ‚©‚ç“Ç‚İ‚Ş—Ş—“x
+	double config_val;//Config.txt ã‹ã‚‰èª­ã¿è¾¼ã‚€é¡ä¼¼åº¦
 	CvPoint min_loc, max_loc;
 	CvPoint Pmin, Pmax;
 	CvSize dst_size;
@@ -200,38 +201,38 @@ int main(int argc, char **argv)
 
 	//-------------------------------------------------------------------------------
 
-	int Savecount = -1;//”»’fˆ——p•Ï”
+	int Savecount = -1;//åˆ¤æ–­å‡¦ç†ç”¨å¤‰æ•°
 
-	//”’lƒf[ƒ^ƒtƒ@ƒCƒ‹“üo—Í
+	//æ•°å€¤ãƒ‡ãƒ¼ã‚¿ãƒ•ã‚¡ã‚¤ãƒ«å…¥å‡ºåŠ›
 	FILE *file,*file_config;
 
-	//ƒtƒHƒ“ƒg - time stamp
+	//ãƒ•ã‚©ãƒ³ãƒˆ - time stamp
 	CvFont font, font_w;
 	cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.5, 1.0, 0, 1, CV_AA);
 	cvInitFont(&font_w, CV_FONT_HERSHEY_SIMPLEX, 0.5, 1.0, 0, 3, CV_AA);
 
-	int defaultCAM = 1;// ThinkPad ƒJƒƒ‰—p‚Ìİ’è
+	int defaultCAM = 1;// ThinkPad ã‚«ãƒ¡ãƒ©ç”¨ã®è¨­å®š
 	CvCapture * videoCapture1 = cvCaptureFromCAM(defaultCAM);
-	//‚P‘ä‚Ì‚İ‚Ìê‡cvCaptureFromCAM‚Ìˆø”‚Í‚È‚ñ‚Å‚à‚¢‚¢
-	//•¡”‘ä‚Ìê‡‚ÍPC‹N“®‚ÌÚ‘±‡‚ªˆø”‚É‚È‚é
+	//ï¼‘å°ã®ã¿ã®å ´åˆcvCaptureFromCAMã®å¼•æ•°ã¯ãªã‚“ã§ã‚‚ã„ã„
+	//è¤‡æ•°å°ã®å ´åˆã¯PCèµ·å‹•æ™‚ã®æ¥ç¶šé †ãŒå¼•æ•°ã«ãªã‚‹
 
 
 	//------------------------------
 	D0();
-	if (_mkdir("ÀŒ±ƒtƒHƒ‹ƒ_") == 0){													//.exe‚Æ“¯‚¶ŠK‘w‚ÉƒfƒBƒŒƒNƒgƒŠ‚ğì¬
-		printf("ƒtƒHƒ‹ƒ_ì¬\n");
+	if (_mkdir("å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€") == 0){													//.exeã¨åŒã˜éšå±¤ã«ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’ä½œæˆ
+		printf("ãƒ•ã‚©ãƒ«ãƒ€ä½œæˆ\n");
 	}
 	else{
-		printf("ƒtƒHƒ‹ƒ_ì¬‚É¸”s‚µ‚Ü‚µ‚½BŠù‚ÉƒtƒHƒ‹ƒ_‚ª‘¶İ‚·‚é‰Â”\«‚ª‚ ‚è‚Ü‚·B\n");
+		printf("ãƒ•ã‚©ãƒ«ãƒ€ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚æ—¢ã«ãƒ•ã‚©ãƒ«ãƒ€ãŒå­˜åœ¨ã™ã‚‹å¯èƒ½æ€§ãŒã‚ã‚Šã¾ã™ã€‚\n");
 	}
-	_mkdir("ÀŒ±ƒtƒHƒ‹ƒ_\\”’lƒf[ƒ^");
-	_mkdir("ÀŒ±ƒtƒHƒ‹ƒ_\\B‰e‰æ‘œ");
-	_mkdir("ÀŒ±ƒtƒHƒ‹ƒ_\\ˆ—‰æ‘œ");
-	//_mkdir("ÀŒ±ƒtƒHƒ‹ƒ_\\ƒ^ƒCƒ€ƒXƒ^ƒ“ƒv‰æ‘œ");
+	_mkdir("å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€\\æ•°å€¤ãƒ‡ãƒ¼ã‚¿");
+	_mkdir("å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€\\æ’®å½±ç”»åƒ");
+	_mkdir("å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€\\å‡¦ç†ç”»åƒ");
+	//_mkdir("å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€\\ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ç”»åƒ");
 
 
-	if (error = fopen_s(&file_config, "./ÀŒ±ƒtƒHƒ‹ƒ_/Config.txt", "r") != 0){
-		fopen_s(&file_config, "./ÀŒ±ƒtƒHƒ‹ƒ_/Config.txt", "w");
+	if (error = fopen_s(&file_config, "./å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€/Config.txt", "r") != 0){
+		fopen_s(&file_config, "./å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€/Config.txt", "w");
 		fprintf(file_config,"0.85");
 		config_val = 0.85;
 		fclose(file_config);
@@ -239,25 +240,25 @@ int main(int argc, char **argv)
 	else{
 		fscanf_s(file_config, "%lf", &config_val);
 		fclose(file_config);
-		fprintf(stderr, "\n—Ş—“x%.1f%%‚Éİ’è‚µ‚Ü‚µ‚½.\n",config_val*100.0);
+		fprintf(stderr, "\né¡ä¼¼åº¦%.1f%%ã«è¨­å®šã—ã¾ã—ãŸ.\n",config_val*100.0);
 	}
-	fprintf(stderr, "\nÀŒ±ƒtƒHƒ‹ƒ_ì¬‚µŠJ‚«‚Ü‚·.\n");
-	fprintf(stderr, "‰ğÍˆ—‚Å•K—v‚Æ‚È‚éƒeƒ“ƒvƒŒ[ƒgŒ³‰æ‘œ‚Ìì¬\n");
-	fprintf(stderr, " B :ƒeƒ“ƒvƒŒ[ƒg—p‰æ‘œ‚Ì•Û‘¶.\n");
+	fprintf(stderr, "\nå®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€ä½œæˆã—é–‹ãã¾ã™.\n");
+	fprintf(stderr, "è§£æå‡¦ç†ã§å¿…è¦ã¨ãªã‚‹ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆå…ƒç”»åƒã®ä½œæˆ\n");
+	fprintf(stderr, " B :ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”¨ç”»åƒã®ä¿å­˜.\n");
 
 
-	//ƒJƒƒ‰‚ğŠJ‚­-----------------
+	//ã‚«ãƒ¡ãƒ©ã‚’é–‹ã-----------------
 	cv::VideoCapture cap;
 	cap.open(0);
 
 	if (!cap.isOpened())	{
-		printf("\n\n\n\nƒGƒ‰[FƒJƒƒ‰‚ğ”F¯‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½.\nI—¹‚µ‚Ü‚·.\n\n");
+		printf("\n\n\n\nã‚¨ãƒ©ãƒ¼ï¼šã‚«ãƒ¡ãƒ©ã‚’èªè­˜ã§ãã¾ã›ã‚“ã§ã—ãŸ.\nçµ‚äº†ã—ã¾ã™.\n\n");
 		getchar();
 		cv::waitKey(10000);
 		return -1;
 	}
 
-	//‘ŠŒİ‘ŠŠÖŒW”•ª•z‚ğ¶¬‚·‚é‚½‚ß‚Ì•Ï”
+	//ç›¸äº’ç›¸é–¢ä¿‚æ•°åˆ†å¸ƒã‚’ç”Ÿæˆã™ã‚‹ãŸã‚ã®å¤‰æ•°
 	img_ccoeff = cvCreateImage(cvSize(640, 480), IPL_DEPTH_32F, 1);
 	cv::Mat frame;
 	while (1){
@@ -272,7 +273,7 @@ int main(int argc, char **argv)
 		}
 
 
-		//ƒEƒBƒ“ƒhƒE¶¬------------------------------------------------------------
+		//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ç”Ÿæˆ------------------------------------------------------------
 		cvNamedWindow("Camera", CV_WINDOW_AUTOSIZE);
 		IplImage *image1 = cvQueryFrame(videoCapture1);
 		cvShowImage("Camera", image1);
@@ -286,44 +287,44 @@ int main(int argc, char **argv)
 		if (key == 'c'){
 			defaultCAM--;
 			if (defaultCAM < 0){ defaultCAM = 3; }
-			printf("\n\nƒJƒƒ‰”Ô†‚ğ%02d‚Ö•ÏX‚µ‚Ü‚µ‚½.\n‰æ–Ê‚Ì“®‚«‚ª‚ ‚ê‚ÎOK‚Å‚·\n", defaultCAM);
+			printf("\n\nã‚«ãƒ¡ãƒ©ç•ªå·ã‚’%02dã¸å¤‰æ›´ã—ã¾ã—ãŸ.\nç”»é¢ã®å‹•ããŒã‚ã‚Œã°OKã§ã™\n", defaultCAM);
 			cvReleaseCapture(&videoCapture1);
 			videoCapture1 = cvCaptureFromCAM(defaultCAM);
 		}
-		//‘ŠŒİ‘ŠŠÖŒW”•ª•z
+		//ç›¸äº’ç›¸é–¢ä¿‚æ•°åˆ†å¸ƒ
 		if (key == 'C'){
 			cvConvertScale(img_ccoeff, img_ccoeff, 1.0 / Cmax, 0.0);
-			cvShowImage("‘ŠŒİ‘ŠŠÖŒW”•ª•z", img_ccoeff);
+			cvShowImage("ç›¸äº’ç›¸é–¢ä¿‚æ•°åˆ†å¸ƒ", img_ccoeff);
 		}
 		//---------------------------------------------------------------------------------------------------------------
 		if (key == 'f' || key == '2'){
-			system("mspaint \"ÀŒ±ƒtƒHƒ‹ƒ_\\ƒeƒ“ƒvƒŒ[ƒg.bmp");												//ƒyƒCƒ“ƒg‚Å‘ÎÛ‚ğŠJ‚­
+			system("mspaint \"å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€\\ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆ.bmp");												//ãƒšã‚¤ãƒ³ãƒˆã§å¯¾è±¡ã‚’é–‹ã
 		}
 		if ( key == '5'){
-			system("explorer \"ÀŒ±ƒtƒHƒ‹ƒ_\\”’lƒf[ƒ^\\Œ‹‰Êƒf[ƒ^.csv");												//ƒGƒNƒXƒvƒ[ƒ‰[‚Å‘ÎÛ‚ğŠJ‚­
+			system("explorer \"å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€\\æ•°å€¤ãƒ‡ãƒ¼ã‚¿\\çµæœãƒ‡ãƒ¼ã‚¿.csv");												//ã‚¨ã‚¯ã‚¹ãƒ—ãƒ­ãƒ¼ãƒ©ãƒ¼ã§å¯¾è±¡ã‚’é–‹ã
 		}
 		if (key == '7'){
-			system("explorer \"ÀŒ±ƒtƒHƒ‹ƒ_\\Config.txt");												//ƒGƒNƒXƒvƒ[ƒ‰[‚Å‘ÎÛ‚ğŠJ‚­
+			system("explorer \"å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€\\Config.txt");												//ã‚¨ã‚¯ã‚¹ãƒ—ãƒ­ãƒ¼ãƒ©ãƒ¼ã§å¯¾è±¡ã‚’é–‹ã
 		}
 		if (key == '8'){
-			system("explorer \"ÀŒ±ƒtƒHƒ‹ƒ_");												//ƒGƒNƒXƒvƒ[ƒ‰[‚Å‘ÎÛ‚ğŠJ‚­
+			system("explorer \"å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€");												//ã‚¨ã‚¯ã‚¹ãƒ—ãƒ­ãƒ¼ãƒ©ãƒ¼ã§å¯¾è±¡ã‚’é–‹ã
 		}
 
-		//ƒfƒBƒŒƒNƒgƒŠì¬---------------------------------------------------------------------------------------------------------
-		/*DƒL[*/if (key == 'd'||key=='D'){ //C:\\Users\\yama\\Documents\\ÀŒ±ƒtƒHƒ‹ƒ_-webCam
-			if (_mkdir("ÀŒ±ƒtƒHƒ‹ƒ_") == 0){													//.exe‚Æ“¯‚¶ŠK‘w‚ÉƒfƒBƒŒƒNƒgƒŠ‚ğì¬
-				printf("ƒtƒHƒ‹ƒ_ì¬\n");
+		//ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªä½œæˆ---------------------------------------------------------------------------------------------------------
+		/*Dã‚­ãƒ¼*/if (key == 'd'||key=='D'){ //C:\\Users\\yama\\Documents\\å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€-webCam
+			if (_mkdir("å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€") == 0){													//.exeã¨åŒã˜éšå±¤ã«ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’ä½œæˆ
+				printf("ãƒ•ã‚©ãƒ«ãƒ€ä½œæˆ\n");
 			}
 			else{
-				printf("ƒtƒHƒ‹ƒ_ì¬‚É¸”s‚µ‚Ü‚µ‚½BŠù‚ÉƒtƒHƒ‹ƒ_‚ª‘¶İ‚·‚é‰Â”\«‚ª‚ ‚è‚Ü‚·B\n");
+				printf("ãƒ•ã‚©ãƒ«ãƒ€ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚æ—¢ã«ãƒ•ã‚©ãƒ«ãƒ€ãŒå­˜åœ¨ã™ã‚‹å¯èƒ½æ€§ãŒã‚ã‚Šã¾ã™ã€‚\n");
 			}
-			system("explorer \"ÀŒ±ƒtƒHƒ‹ƒ_");												//ƒGƒNƒXƒvƒ[ƒ‰[‚Å‘ÎÛ‚ğŠJ‚­
-			_mkdir("ÀŒ±ƒtƒHƒ‹ƒ_\\”’lƒf[ƒ^");
-			_mkdir("ÀŒ±ƒtƒHƒ‹ƒ_\\B‰e‰æ‘œ");
-			_mkdir("ÀŒ±ƒtƒHƒ‹ƒ_\\ˆ—‰æ‘œ");
-			//_mkdir("ÀŒ±ƒtƒHƒ‹ƒ_\\ƒ^ƒCƒ€ƒXƒ^ƒ“ƒv‰æ‘œ");
+			system("explorer \"å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€");												//ã‚¨ã‚¯ã‚¹ãƒ—ãƒ­ãƒ¼ãƒ©ãƒ¼ã§å¯¾è±¡ã‚’é–‹ã
+			_mkdir("å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€\\æ•°å€¤ãƒ‡ãƒ¼ã‚¿");
+			_mkdir("å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€\\æ’®å½±ç”»åƒ");
+			_mkdir("å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€\\å‡¦ç†ç”»åƒ");
+			//_mkdir("å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€\\ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—ç”»åƒ");
 
-			fprintf(stderr, "ÀŒ±—pƒtƒHƒ‹ƒ_ì¬‚ğŠJ‚«‚Ü‚·.\n");
+			fprintf(stderr, "å®Ÿé¨“ç”¨ãƒ•ã‚©ãƒ«ãƒ€ä½œæˆã‚’é–‹ãã¾ã™.\n");
 			D(key);
 
 		}
@@ -332,22 +333,22 @@ int main(int argc, char **argv)
 
 
 
-		//‰æ‘œ‚Ì1–‡‚Ì•Û‘¶‚ğs‚¤------------------------------------------------------------------------------
-		/*BƒL[*/if (key == 'b'||key=='B'||key=='1'){
+		//ç”»åƒã®1æšã®ä¿å­˜ã‚’è¡Œã†------------------------------------------------------------------------------
+		/*Bã‚­ãƒ¼*/if (key == 'b'||key=='B'||key=='1'){
 			//	IplImage output = frame;
 			IplImage *output = cvQueryFrame(videoCapture1);
 
-			sprintf_s(strB, "%s\\ƒeƒ“ƒvƒŒ[ƒg.bmp", FolderName);
+			sprintf_s(strB, "%s\\ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆ.bmp", FolderName);
 			cvSaveImage(strB, output);
 
-			fprintf(stderr, "ƒeƒ“ƒvƒŒ[ƒg—p‰æ‘œ‚Ì•Û‘¶‚É¬Œ÷‚µ‚Ü‚µ‚½\n");
+			fprintf(stderr, "ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”¨ç”»åƒã®ä¿å­˜ã«æˆåŠŸã—ã¾ã—ãŸ\n");
 			D(key);
 		}
 		//-------------------------------------------------------------------------------------------------
 
-		//İ’è–‡”•ª‚Ì‰æ‘œ‚ğƒƒ‚ƒŠg—p‚µ•Û‘¶‚·‚é------------------------------------------------------------------------
-		/*sƒL[*/if (key == 's'||key=='3'){
-			fprintf(stderr, "‰æ‘œ‚ğƒƒ‚ƒŠ‚ÉŠi”[‚µ‚Ü‚·.(Space key ‚ÅI—¹).\n");
+		//è¨­å®šæšæ•°åˆ†ã®ç”»åƒã‚’ãƒ¡ãƒ¢ãƒªä½¿ç”¨ã—ä¿å­˜ã™ã‚‹------------------------------------------------------------------------
+		/*sã‚­ãƒ¼*/if (key == 's'||key=='3'){
+			fprintf(stderr, "ç”»åƒã‚’ãƒ¡ãƒ¢ãƒªã«æ ¼ç´ã—ã¾ã™.(Space key ã§çµ‚äº†).\n");
 			cvDestroyAllWindows();
 			IplImage *output;
 			IplImage** vout;
@@ -356,7 +357,7 @@ int main(int argc, char **argv)
 			startClock();
 			for (i = 0; i < FILECOUNT; i++){
 				if (GetAsyncKeyState(VK_SPACE) & 0x8000){
-					printf("Space key‚ª“ü—Í‚³‚ê‚Ü‚µ‚½B‹L˜^‚ğI—¹‚µ‚Ü‚·B");
+					printf("Space keyãŒå…¥åŠ›ã•ã‚Œã¾ã—ãŸã€‚è¨˜éŒ²ã‚’çµ‚äº†ã—ã¾ã™ã€‚");
 					break;
 				}
 
@@ -364,23 +365,23 @@ int main(int argc, char **argv)
 				output = cvQueryFrame(videoCapture1);
 				vout[i] = cvCloneImage(output);
 				saveClock(i);
-				printf("%04d (Space key ‚ÅI—¹)\n", i);
+				printf("%04d (Space key ã§çµ‚äº†)\n", i);
 			}
 			int imax = i;	
-			fprintf(stderr, "‰æ‘œ‚ğƒfƒBƒXƒN‚É•Û‘¶‚µ‚Ü‚·.\n");
+			fprintf(stderr, "ç”»åƒã‚’ãƒ‡ã‚£ã‚¹ã‚¯ã«ä¿å­˜ã—ã¾ã™.\n");
 
 			for (int i = 0; i < imax; i++){
-				sprintf_s(strS, "%s\\B‰e‰æ‘œ\\outputpic_%04d.bmp", FolderName, i);
+				sprintf_s(strS, "%s\\æ’®å½±ç”»åƒ\\outputpic_%04d.bmp", FolderName, i);
 				if (vout[i] == NULL) continue;
 				cvShowImage("Camera", vout[i]);
 				cvWaitKey(2);
 				cvSaveImage(strS, vout[i]);
-				printf("outputpic_%04d.bmp •Û‘¶\n", i);
+				printf("outputpic_%04d.bmp ä¿å­˜\n", i);
 				cvReleaseImage(&(vout[i]));
 			}
 			free(vout);
 
-			fprintf(stderr, "B‰e‰æ‘œ‚ğ•Û‘¶‚µ‚Ü‚µ‚½.\n");
+			fprintf(stderr, "æ’®å½±ç”»åƒã‚’ä¿å­˜ã—ã¾ã—ãŸ.\n");
 			fprintClock();
 			//--------------------------------------------------------------------------
 			cvShowImage("Camera", image1);
@@ -388,9 +389,9 @@ int main(int argc, char **argv)
 		}
 		//--------------------------------------------------------------------------------------------------
 
-		//İ’è–‡”•ª‚Ì‰æ‘œ‚ğƒƒ‚ƒŠg—p‚µ–³ŒÀ‚É•Û‘¶‚·‚é------------------------------------------------------------------------
+		//è¨­å®šæšæ•°åˆ†ã®ç”»åƒã‚’ãƒ¡ãƒ¢ãƒªä½¿ç”¨ã—ç„¡é™ã«ä¿å­˜ã™ã‚‹------------------------------------------------------------------------
 		if (key == 't'){
-			fprintf(stderr, "‰æ‘œƒƒ‚ƒŠŠi”[ŠJn.(Space key ‚ÅI—¹).\n");
+			fprintf(stderr, "ç”»åƒãƒ¡ãƒ¢ãƒªæ ¼ç´é–‹å§‹.(Space key ã§çµ‚äº†).\n");
 			cvDestroyAllWindows();
 			IplImage *output;
 			IplImage** vout;
@@ -400,7 +401,7 @@ int main(int argc, char **argv)
 			startClock();
 			for (i = 0; i < mFILECOUNT; i++){
 				if (GetAsyncKeyState(VK_SPACE) & 0x8000){
-					printf("Space key‚ª“ü—Í‚³‚ê‚Ü‚µ‚½B‹L˜^‚ğI—¹‚µ‚Ü‚·B");
+					printf("Space keyãŒå…¥åŠ›ã•ã‚Œã¾ã—ãŸã€‚è¨˜éŒ²ã‚’çµ‚äº†ã—ã¾ã™ã€‚");
 					break;
 				}
 				cap >> frame;
@@ -408,25 +409,25 @@ int main(int argc, char **argv)
 				output = cvQueryFrame(videoCapture1);
 				vout[i] = cvCloneImage(output);
 				if (vout[i] == NULL){
-					printf("ƒƒ‚ƒŠŠi”[‚É¸”s‚µ‚Ü‚µ‚½B‹L˜^‚ğI—¹‚µ‚Ü‚·B");
+					printf("ãƒ¡ãƒ¢ãƒªæ ¼ç´ã«å¤±æ•—ã—ã¾ã—ãŸã€‚è¨˜éŒ²ã‚’çµ‚äº†ã—ã¾ã™ã€‚");
 					break;
 				}
 				saveClock(i);
-				printf("%04d ƒƒ‚ƒŠŠi”[\n", i);
+				printf("%04d ãƒ¡ãƒ¢ãƒªæ ¼ç´\n", i);
 			}
 			int imax = i;
-			fprintf(stderr, "‰æ‘œ•Û‘¶ŠJn.\n");
+			fprintf(stderr, "ç”»åƒä¿å­˜é–‹å§‹.\n");
 
 			for (int i = 0; i < imax; i++){
-				sprintf_s(strS, "%s\\B‰e‰æ‘œ\\outputpic_%04d.bmp", FolderName, i);
+				sprintf_s(strS, "%s\\æ’®å½±ç”»åƒ\\outputpic_%04d.bmp", FolderName, i);
 				if (vout[i] == NULL) continue;
 				cvSaveImage(strS, vout[i]);
-				printf("outputpic_%04d.bmp •Û‘¶\n", i);
+				printf("outputpic_%04d.bmp ä¿å­˜\n", i);
 				cvReleaseImage(&(vout[i]));
 			}
 			free(vout);
 
-			fprintf(stderr, "B‰e‰æ‘œ‚ğ•Û‘¶‚µ‚Ü‚µ‚½.\n");
+			fprintf(stderr, "æ’®å½±ç”»åƒã‚’ä¿å­˜ã—ã¾ã—ãŸ.\n");
 			fprintClock();
 			//--------------------------------------------------------------------------
 			cvShowImage("Camera", image1);
@@ -436,23 +437,23 @@ int main(int argc, char **argv)
 
 
 
-		//İ’è–‡”•ª‚Ì‰æ‘œ‚ğ•Û‘¶‚·‚é------------------------------------------------------------------------
-		/*SƒL[*/if (key == 'S'){
-			fprintf(stderr, "‰æ‘œ•Û‘¶ŠJn.\n");
+		//è¨­å®šæšæ•°åˆ†ã®ç”»åƒã‚’ä¿å­˜ã™ã‚‹------------------------------------------------------------------------
+		/*Sã‚­ãƒ¼*/if (key == 'S'){
+			fprintf(stderr, "ç”»åƒä¿å­˜é–‹å§‹.\n");
 			cvDestroyAllWindows();
 			startClock();
 			for (int i = 0; i < FILECOUNT; i++){
 				cap >> frame;
 
 				IplImage *output = cvQueryFrame(videoCapture1);
-				sprintf_s(strS, "%s\\B‰e‰æ‘œ\\outputpic_%04d.bmp", FolderName, i);								
+				sprintf_s(strS, "%s\\æ’®å½±ç”»åƒ\\outputpic_%04d.bmp", FolderName, i);								
 				saveClock(i);
 				cvSaveImage(strS, output);
 
-				printf("outputpic_%04d.bmp •Û‘¶\n", i);
+				printf("outputpic_%04d.bmp ä¿å­˜\n", i);
 			}
 
-			fprintf(stderr, "B‰e‰æ‘œ‚ğ•Û‘¶‚µ‚Ü‚µ‚½.\n");
+			fprintf(stderr, "æ’®å½±ç”»åƒã‚’ä¿å­˜ã—ã¾ã—ãŸ.\n");
 			fprintClock();
 
 			cvShowImage("Camera", image1);
@@ -461,18 +462,18 @@ int main(int argc, char **argv)
 		//--------------------------------------------------------------------------------------------------
 
 
-		//–³§ŒÀ‚É•Û‘¶‚·‚é--------------------HDD—Ìˆæ‚ª‹–‚·ŒÀ‚è‹L˜^‚Å‚«‚é‚Í‚¸
-		/*TƒL[*/if (key == 'T'){
+		//ç„¡åˆ¶é™ã«ä¿å­˜ã™ã‚‹--------------------HDDé ˜åŸŸãŒè¨±ã™é™ã‚Šè¨˜éŒ²ã§ãã‚‹ã¯ãš
+		/*Tã‚­ãƒ¼*/if (key == 'T'){
 
-			//•Û‘¶’†CameraƒEƒBƒ“ƒhƒE‚ª‰“š’†‚É‚È‚é‚Ì‚ÅƒEƒBƒ“ƒhƒE‚ğÁ‚µ‚Ä‚¨‚­
+			//ä¿å­˜ä¸­Cameraã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãŒå¿œç­”ä¸­ã«ãªã‚‹ã®ã§ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’æ¶ˆã—ã¦ãŠã
 			cvDestroyAllWindows();
 
 			Savecount = 0;
-			fprintf(stderr, "–³§ŒÀ‚É•Û‘¶‚·‚é Space key‚ÅI—¹");
+			fprintf(stderr, "ç„¡åˆ¶é™ã«ä¿å­˜ã™ã‚‹ Space keyã§çµ‚äº†");
 			startClock();
 			for (int i = 0; i < FILECOUNT_MAX;i++){
 				if (GetAsyncKeyState(VK_SPACE) & 0x8000){
-					printf("Space key‚ª“ü—Í‚³‚ê‚Ü‚µ‚½B‹L˜^‚ğI—¹‚µ‚Ü‚·B");
+					printf("Space keyãŒå…¥åŠ›ã•ã‚Œã¾ã—ãŸã€‚è¨˜éŒ²ã‚’çµ‚äº†ã—ã¾ã™ã€‚");
 					break;
 				}
 
@@ -480,42 +481,42 @@ int main(int argc, char **argv)
 				//IplImage output = frame;
 				IplImage *output = cvQueryFrame(videoCapture1);
 
-				sprintf_s(strR, "%s\\B‰e‰æ‘œ\\outputpic_%04d.bmp", FolderName, i);
+				sprintf_s(strR, "%s\\æ’®å½±ç”»åƒ\\outputpic_%04d.bmp", FolderName, i);
 				saveClock(i);
 				cvSaveImage(strR, output);
 				printf("outputpic_%04d.bmp :", i);
 				i++;
 			}
 
-			//CameraƒEƒBƒ“ƒhƒEÄ•\¦
+			//Cameraã‚¦ã‚£ãƒ³ãƒ‰ã‚¦å†è¡¨ç¤º
 			cvShowImage("Camera", image1);
 			fprintClock();
-			fprintf(stderr, "‰æ‘œ‚Ì•Û‘¶‚É¬Œ÷‚µ‚Ü‚µ‚½!\n");
+			fprintf(stderr, "ç”»åƒã®ä¿å­˜ã«æˆåŠŸã—ã¾ã—ãŸ!\n");
 			D(key);
 		}
 
 		//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		
-		if (key == 'M'){//ƒ}ƒbƒ`ƒeƒ“ƒvƒŒ[ƒg old version(ƒƒ‚ƒŠƒŠ[ƒN‚ ‚èIIIj
+		if (key == 'M'){//ãƒãƒƒãƒãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆ old version(ãƒ¡ãƒ¢ãƒªãƒªãƒ¼ã‚¯ã‚ã‚Šï¼ï¼ï¼ï¼‰
 			int num_bmp = 0;
 			int num_effected = 0;
 			IplImage *tmp_img;
 
-			double val4files[FILECOUNT];//—Ş—“x
-			char XYpoint[FILECOUNT][20];//À•Wæ“¾‚Ì•¶š—ñ20•¶š
+			double val4files[FILECOUNT];//é¡ä¼¼åº¦
+			char XYpoint[FILECOUNT][20];//åº§æ¨™å–å¾—ã®æ–‡å­—åˆ—20æ–‡å­—
 			for (int i1 = 0; i1 < FILECOUNT; i1++){
 				val4files[i1] = -0.01;
 			}
 
 			cvDestroyAllWindows();
 			//--------------------------------------------------------------------------------------
-			printf("\n\n‰ğÍˆ—‚ğs‚¢‚Ü‚·.\n");
-			// precheck for Œ‹‰Êƒf[ƒ^
-			sprintf_s(strR, "%s\\”’lƒf[ƒ^\\Œ‹‰Êƒf[ƒ^.csv", FolderName);
+			printf("\n\nè§£æå‡¦ç†ã‚’è¡Œã„ã¾ã™.\n");
+			// precheck for çµæœãƒ‡ãƒ¼ã‚¿
+			sprintf_s(strR, "%s\\æ•°å€¤ãƒ‡ãƒ¼ã‚¿\\çµæœãƒ‡ãƒ¼ã‚¿.csv", FolderName);
 			if (error = fopen_s(&file, strR, "w") != 0){
 				printf("%s\n", strR);
-				fprintf(stderr, "Œ‹‰Êƒf[ƒ^‚É‘‚«‚ß‚Ü‚¹‚ñ.ˆ—‚ğ’†’f‚µ‚Ü‚·.\n");
-				fprintf(stderr, "iExcel‚È‚Ç‚ÅŠJ‚¢‚Ä‚¢‚é‚Æ‘‚«‚ß‚Ü‚¹‚ñ‚Ì‚Å•Â‚¶‚Ä‚­‚¾‚³‚¢.j\n\n");
+				fprintf(stderr, "çµæœãƒ‡ãƒ¼ã‚¿ã«æ›¸ãè¾¼ã‚ã¾ã›ã‚“.å‡¦ç†ã‚’ä¸­æ–­ã—ã¾ã™.\n");
+				fprintf(stderr, "ï¼ˆExcelãªã©ã§é–‹ã„ã¦ã„ã‚‹ã¨æ›¸ãè¾¼ã‚ã¾ã›ã‚“ã®ã§é–‰ã˜ã¦ãã ã•ã„.ï¼‰\n\n");
 				cvShowImage("Camera", image1);
 				D('d');
 				continue;
@@ -524,33 +525,33 @@ int main(int argc, char **argv)
 
 			//for csv
 			if (fscanClock() ==-1){
-				fprintf(stderr, "B‰eƒf[ƒ^‚ª‚ ‚è‚Ü‚¹‚ñ.\n");
-				fprintf(stderr, "B‰e‚ğs‚Á‚Ä‚­‚¾‚³‚¢.\n\n");
+				fprintf(stderr, "æ’®å½±ãƒ‡ãƒ¼ã‚¿ãŒã‚ã‚Šã¾ã›ã‚“.\n");
+				fprintf(stderr, "æ’®å½±ã‚’è¡Œã£ã¦ãã ã•ã„.\n\n");
 				cvShowImage("Camera", image1);
 				D('b');
 				continue;
 
 			}
 			//--------------------------------------------------------------------------------------
-			printf("ƒeƒ“ƒvƒŒ[ƒgƒ}ƒbƒ`ƒ“ƒOˆ—‚ğs‚¢‚Ü‚·B­X‚¨‘Ò‚¿‚­‚¾‚³‚¢B\n");
+			printf("ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆãƒãƒƒãƒãƒ³ã‚°å‡¦ç†ã‚’è¡Œã„ã¾ã™ã€‚å°‘ã€…ãŠå¾…ã¡ãã ã•ã„ã€‚\n");
 
-			//“Ç‚İ‚İ
-			sprintf_s(strR, "%s\\ƒeƒ“ƒvƒŒ[ƒg.bmp", FolderName);						//template picture as bmp format
+			//èª­ã¿è¾¼ã¿
+			sprintf_s(strR, "%s\\ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆ.bmp", FolderName);						//template picture as bmp format
 			tmp_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 
-			//“Ç‚İ‚İ¸”s
+			//èª­ã¿è¾¼ã¿å¤±æ•—
 			if (tmp_img == NULL) {
-				fprintf(stderr, "ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚Ì“Ç‚İ‚É¸”s‚µ‚Ü‚µ‚½.\n");
-				fprintf(stderr, "ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚ğì¬‚µ‚Ä‚­‚¾‚³‚¢.\n\n");
+				fprintf(stderr, "ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã®èª­è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸ.\n");
+				fprintf(stderr, "ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã‚’ä½œæˆã—ã¦ãã ã•ã„.\n\n");
 				cvShowImage("Camera", image1);
 				D('d');
 				continue;
 			}
 
 			//read config.txt
-			if (error = fopen_s(&file_config, "./ÀŒ±ƒtƒHƒ‹ƒ_/Config.txt", "r") != 0){
-				fprintf(stderr, "Config.txt ‚Ì“Ç‚İ‚É¸”s‚µ‚Ü‚µ‚½.\n");
-				fprintf(stderr, "Ä‹N“®‚µ‚Ä‚­‚¾‚³‚¢.\n\n");
+			if (error = fopen_s(&file_config, "./å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€/Config.txt", "r") != 0){
+				fprintf(stderr, "Config.txt ã®èª­è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸ.\n");
+				fprintf(stderr, "å†èµ·å‹•ã—ã¦ãã ã•ã„.\n\n");
 				cvShowImage("Camera", image1);
 				D('d');
 				continue;
@@ -562,13 +563,13 @@ int main(int argc, char **argv)
 			}
 			
 			for (i = 0; i < FILECOUNT; i++){
-				sprintf_s(strR, "%s\\B‰e‰æ‘œ\\outputpic_%04d.bmp", FolderName, i);
+				sprintf_s(strR, "%s\\æ’®å½±ç”»åƒ\\outputpic_%04d.bmp", FolderName, i);
 				src_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 
-				//“Ç‚İ‚İ¸”s
+				//èª­ã¿è¾¼ã¿å¤±æ•—
 				if (src_img == NULL) {
-					fprintf(stderr, "B‰e‰æ‘œ‚Ì“Ç‚İ‚É¸”s‚µ‚Ü‚µ‚½.\n");
-					fprintf(stderr, "B‰e‰æ‘œ‚ğ‚â‚è’¼‚µ‚Ä‚­‚¾‚³‚¢.\n\n");
+					fprintf(stderr, "æ’®å½±ç”»åƒã®èª­è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸ.\n");
+					fprintf(stderr, "æ’®å½±ç”»åƒã‚’ã‚„ã‚Šç›´ã—ã¦ãã ã•ã„.\n\n");
 					cvShowImage("Camera", image1);
 					D('b');
 					continue;
@@ -576,14 +577,14 @@ int main(int argc, char **argv)
 				else{
 					num_bmp++;
 					printf("outputpic_%04d.bmp:", i);
-					// (1)’Tõ‰æ‘œ‘S‘Ì‚É‘Î‚µ‚ÄCƒeƒ“ƒvƒŒ[ƒg‚Ìƒ}ƒbƒ`ƒ“ƒO’liw’è‚µ‚½è–@‚ÉˆË‘¶j‚ğŒvZ
+					// (1)æ¢ç´¢ç”»åƒå…¨ä½“ã«å¯¾ã—ã¦ï¼Œãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã®ãƒãƒƒãƒãƒ³ã‚°å€¤ï¼ˆæŒ‡å®šã—ãŸæ‰‹æ³•ã«ä¾å­˜ï¼‰ã‚’è¨ˆç®—
 					dst_size = cvSize(src_img->width - tmp_img->width + 1, src_img->height - tmp_img->height + 1);
 					dst_img = cvCreateImage(dst_size, IPL_DEPTH_32F, 1);
-					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);				//method‚à•Ï‚¦‚Â‚ÂŒŸØ‚ª•K—v
+					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);				//methodã‚‚å¤‰ãˆã¤ã¤æ¤œè¨¼ãŒå¿…è¦
 
 					cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
 
-					/*150”Ô–Ú‚Ì—Ş—“xŠm”F—p*/
+					/*150ç•ªç›®ã®é¡ä¼¼åº¦ç¢ºèªç”¨*/
 					if (i == 150){
 						img_ccoeff = dst_img;
 						cvMinMaxLoc(img_ccoeff, &Cmin, &Cmax, &Pmin, &Pmax, NULL);
@@ -591,23 +592,23 @@ int main(int argc, char **argv)
 					}
 					cvReleaseImage(&dst_img);
 					max_val = max_val;
-					//ƒeƒ“ƒvƒŒ[ƒg‚Æ’Tõ‘ÎÛ‚Ì—Ş—“x‚ªconfig_val –¢–‚ÍÌ‚Ä‚é
+					//ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã¨æ¢ç´¢å¯¾è±¡ã®é¡ä¼¼åº¦ãŒconfig_val æœªæº€ã¯æ¨ã¦ã‚‹
 					if (val4files[i] < config_val){
-						//X,YÀ•W‚Ìo—Í - for csv
+						//X,Yåº§æ¨™ã®å‡ºåŠ› - for csv
 						sprintf_s(XYpoint[i], ",%02d,%02d", 0, 0);
-						printf("—Ş—“x%.1f(%.1f%%–¢–)\n",max_val*100.0,config_val*100.0);
+						printf("é¡ä¼¼åº¦%.1f(%.1f%%æœªæº€)\n",max_val*100.0,config_val*100.0);
 					}
 					else{						
-						// (2)ƒeƒ“ƒvƒŒ[ƒg‚É‘Î‰‚·‚éˆÊ’u‚É‹éŒ`‚ğ•`‰æA’†S“_‚à•`‰æ
-						cvRectangle(src_img, max_loc, cvPoint(max_loc.x + tmp_img->width, max_loc.y + tmp_img->height), CV_RGB(255, 0, 0), 2);//lŠp‚ğ•`‰æ
-						cvCircle(src_img, cvPoint(max_loc.x + tmp_img->width / 2, max_loc.y + tmp_img->height / 2), 1, CV_RGB(0, 255, 0), -1, 8);//’†S•`‰æ
-						//ƒ^ƒCƒ€ƒXƒ^ƒ“ƒv
+						// (2)ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã«å¯¾å¿œã™ã‚‹ä½ç½®ã«çŸ©å½¢ã‚’æç”»ã€ä¸­å¿ƒç‚¹ã‚‚æç”»
+						cvRectangle(src_img, max_loc, cvPoint(max_loc.x + tmp_img->width, max_loc.y + tmp_img->height), CV_RGB(255, 0, 0), 2);//å››è§’ã‚’æç”»
+						cvCircle(src_img, cvPoint(max_loc.x + tmp_img->width / 2, max_loc.y + tmp_img->height / 2), 1, CV_RGB(0, 255, 0), -1, 8);//ä¸­å¿ƒæç”»
+						//ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—
 						
-						cvPutText(src_img, sprintClock(i) , cvPoint(20, 25), &font_w, CV_RGB(255, 255, 255));	//”’‰
-						cvPutText(src_img, sprintClock(i) , cvPoint(20, 25), &font, CV_RGB(0, 0, 0));			//••¶š
+						cvPutText(src_img, sprintClock(i) , cvPoint(20, 25), &font_w, CV_RGB(255, 255, 255));	//ç™½ç¸
+						cvPutText(src_img, sprintClock(i) , cvPoint(20, 25), &font, CV_RGB(0, 0, 0));			//é»’æ–‡å­—
 
 						num_effected++;
-						sprintf_s(strR, "%s\\ˆ—‰æ‘œ\\Effected_%04d.bmp", FolderName, i);
+						sprintf_s(strR, "%s\\å‡¦ç†ç”»åƒ\\Effected_%04d.bmp", FolderName, i);
 						cvSaveImage(strR, src_img);
 						cvReleaseImage(&src_img);
 						test = (max_loc.x + tmp_img->width / 2);
@@ -615,9 +616,9 @@ int main(int argc, char **argv)
 							max = test;
 							M = i;
 						}
-						//X,YÀ•W‚Ìo—Í - for csv
+						//X,Yåº§æ¨™ã®å‡ºåŠ› - for csv
 						sprintf_s(XYpoint[i], ",%02d,%02d", (max_loc.x + tmp_img->width / 2), (max_loc.y + tmp_img->height / 2));
-						printf("Effected_%04d.bmp ì¬ (—Ş—“x%.1f%%)\n", i, max_val*100.0);
+						printf("Effected_%04d.bmp ä½œæˆ (é¡ä¼¼åº¦%.1f%%)\n", i, max_val*100.0);
 
 					}
 				}
@@ -625,12 +626,12 @@ int main(int argc, char **argv)
 			}
 			cvReleaseImage(&tmp_img);
 
-			//Œ‹‰Êƒf[ƒ^‚Ì‘‚«‚İ
-			sprintf_s(strR, "%s\\”’lƒf[ƒ^\\Œ‹‰Êƒf[ƒ^.csv", FolderName);
+			//çµæœãƒ‡ãƒ¼ã‚¿ã®æ›¸ãè¾¼ã¿
+			sprintf_s(strR, "%s\\æ•°å€¤ãƒ‡ãƒ¼ã‚¿\\çµæœãƒ‡ãƒ¼ã‚¿.csv", FolderName);
 			if (error = fopen_s(&file, strR, "w") !=0){
 				printf("%s\n", strT);
-				fprintf(stderr, "Œ‹‰Êƒf[ƒ^‚É‘‚«‚ß‚Ü‚¹‚ñ.\n");
-				fprintf(stderr, "iExcel‚È‚Ç‚ÅŠJ‚¢‚Ä‚¢‚é‚Æ‘‚«‚ß‚Ü‚¹‚ñ.j\n\n");
+				fprintf(stderr, "çµæœãƒ‡ãƒ¼ã‚¿ã«æ›¸ãè¾¼ã‚ã¾ã›ã‚“.\n");
+				fprintf(stderr, "ï¼ˆExcelãªã©ã§é–‹ã„ã¦ã„ã‚‹ã¨æ›¸ãè¾¼ã‚ã¾ã›ã‚“.ï¼‰\n\n");
 				cvShowImage("Camera", image1);
 				D('d');
 				continue;
@@ -639,67 +640,67 @@ int main(int argc, char **argv)
 			
 			if (num_effected != 0){
 				//----------------------------------------------------------------------------------------------
-				//Œ‹‰ÊCSV1s–Ú‚Ì‹Lq
-				//fprintf(file, "‰æ‘œƒtƒ@ƒCƒ‹–¼,,•ª,•b,ƒ~ƒŠ•b,Œo‰ßŠÔ,t(s),x[pixel],y[pixel],X[meter],Y[meter],,ƒ{[ƒ‹‚Ì’¼Œa(ƒ[ƒgƒ‹)¨,(ƒ{[ƒ‹‚Ì’¼Œa‚ğ“ü—Í),ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚Å‚ÌƒsƒNƒZƒ‹ƒTƒCƒY¨,(ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚Ì‰¡ƒTƒCƒY‚ğ“ü—Í,1ƒsƒNƒZƒ‹‚ ‚½‚èƒ[ƒgƒ‹o—Í¨,=$N$1/$P$1\n");
-				fprintf(file, "‰æ‘œƒtƒ@ƒCƒ‹–¼,Œo‰ßŠÔ,t(s),x[pixel],y[pixel],X[meter],Y[meter],,ƒ{[ƒ‹‚Ì’¼Œa(ƒ[ƒgƒ‹)¨,(ƒ{[ƒ‹‚Ì’¼Œa‚ğ“ü—Í),ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚Å‚ÌƒsƒNƒZƒ‹ƒTƒCƒY¨,(ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚Ì‰¡ƒTƒCƒY‚ğ“ü—Í,1ƒsƒNƒZƒ‹‚ ‚½‚èƒ[ƒgƒ‹o—Í¨,=$J$1/$L$1\n");
-				//Šes‚Ì‹Lq
+				//çµæœCSV1è¡Œç›®ã®è¨˜è¿°
+				//fprintf(file, "ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«å,æ™‚,åˆ†,ç§’,ãƒŸãƒªç§’,çµŒéæ™‚é–“,t(s),x[pixel],y[pixel],X[meter],Y[meter],,ãƒœãƒ¼ãƒ«ã®ç›´å¾„(ãƒ¡ãƒ¼ãƒˆãƒ«)â†’,(ãƒœãƒ¼ãƒ«ã®ç›´å¾„ã‚’å…¥åŠ›),ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã§ã®ãƒ”ã‚¯ã‚»ãƒ«ã‚µã‚¤ã‚ºâ†’,(ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã®æ¨ªã‚µã‚¤ã‚ºã‚’å…¥åŠ›,1ãƒ”ã‚¯ã‚»ãƒ«ã‚ãŸã‚Šãƒ¡ãƒ¼ãƒˆãƒ«å‡ºåŠ›â†’,=$N$1/$P$1\n");
+				fprintf(file, "ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«å,çµŒéæ™‚é–“,t(s),x[pixel],y[pixel],X[meter],Y[meter],,ãƒœãƒ¼ãƒ«ã®ç›´å¾„(ãƒ¡ãƒ¼ãƒˆãƒ«)â†’,(ãƒœãƒ¼ãƒ«ã®ç›´å¾„ã‚’å…¥åŠ›),ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã§ã®ãƒ”ã‚¯ã‚»ãƒ«ã‚µã‚¤ã‚ºâ†’,(ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã®æ¨ªã‚µã‚¤ã‚ºã‚’å…¥åŠ›,1ãƒ”ã‚¯ã‚»ãƒ«ã‚ãŸã‚Šãƒ¡ãƒ¼ãƒˆãƒ«å‡ºåŠ›â†’,=$J$1/$L$1\n");
+				//å„è¡Œã®è¨˜è¿°
 				int c = 2; // line number of csv file (start from 2)
 				for (i = 0; i < FILECOUNT; i++){
 					if (val4files[i] <config_val){
 						//printf("%d skiped\n",i);
 						//getchar();
 					}
-					//”’lƒf[ƒ^‚Éƒtƒ@ƒCƒ‹–¼‚È‚ÇÀ•WAƒGƒNƒZƒ‹ã‚Å‚ÌŒvZ®‚ğo—Í‚³‚¹‚é
+					//æ•°å€¤ãƒ‡ãƒ¼ã‚¿ã«ãƒ•ã‚¡ã‚¤ãƒ«åãªã©åº§æ¨™ã€ã‚¨ã‚¯ã‚»ãƒ«ä¸Šã§ã®è¨ˆç®—å¼ã‚’å‡ºåŠ›ã•ã›ã‚‹
 					else{
 						char FName[50];
 						sprintf_s(FName, "img_%04d.bmp,%s", i, sprintClock(i));
-						fprintf(file, FName);				//ƒtƒ@ƒCƒ‹–¼&ƒf[ƒ^‚ğo—Í
-						//fprintf(file, ",= B%d *60*60*100 + C%d * 60 *1000 + D%d * 1000 + E%d", c, c, c, c);		//•bDƒ~ƒŠ•bÀ•W‚ğ”’lƒf[ƒ^o—Í
-						//fprintf(file, ",= (F%d - $F$2)/1000", c);		//‚PƒtƒŒ[ƒ€‚²‚Æ‚ÌŠÔÀ•W‚ğ”’lƒf[ƒ^o—Í
-						fprintf(file, ",= B%d - $B$2", c);		//‚PƒtƒŒ[ƒ€‚²‚Æ‚ÌŠÔÀ•W‚ğ”’lƒf[ƒ^o—Í
-						fprintf(file, XYpoint[i]);		//XYÀ•W‚ğ”’lƒf[ƒ^o—Í
-						//fprintf(file, ",=(H%d-$H$2)*$R$1,=(I%d-$I$2)*$R$1", c, c);		//x‚Æy‚ğ”’lƒf[ƒ^o—Í
-						fprintf(file, ",=(D%d-$D$2)*$N$1,=(E%d-$E$2)*$N$1", c, c);		//x‚Æy‚ğ”’lƒf[ƒ^o—Í
+						fprintf(file, FName);				//ãƒ•ã‚¡ã‚¤ãƒ«å&æ™‚åˆ»ãƒ‡ãƒ¼ã‚¿ã‚’å‡ºåŠ›
+						//fprintf(file, ",= B%d *60*60*100 + C%d * 60 *1000 + D%d * 1000 + E%d", c, c, c, c);		//ç§’ï¼ãƒŸãƒªç§’åº§æ¨™ã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
+						//fprintf(file, ",= (F%d - $F$2)/1000", c);		//ï¼‘ãƒ•ãƒ¬ãƒ¼ãƒ ã”ã¨ã®æ™‚é–“åº§æ¨™ã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
+						fprintf(file, ",= B%d - $B$2", c);		//ï¼‘ãƒ•ãƒ¬ãƒ¼ãƒ ã”ã¨ã®æ™‚é–“åº§æ¨™ã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
+						fprintf(file, XYpoint[i]);		//XYåº§æ¨™ã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
+						//fprintf(file, ",=(H%d-$H$2)*$R$1,=(I%d-$I$2)*$R$1", c, c);		//xã¨yã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
+						fprintf(file, ",=(D%d-$D$2)*$N$1,=(E%d-$E$2)*$N$1", c, c);		//xã¨yã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
 
-						fprintf(file, "\n");			//‰üs‚µ‚È‚¢‚Æ‰¡1—ñ‚É‚È‚é
+						fprintf(file, "\n");			//æ”¹è¡Œã—ãªã„ã¨æ¨ª1åˆ—ã«ãªã‚‹
 						c++;
 					}
 				}
 
-				printf("”’lƒf[ƒ^o—Í‚ªI—¹‚µ‚Ü‚µ‚½.\n");
+				printf("æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›ãŒçµ‚äº†ã—ã¾ã—ãŸ.\n");
 
 
 				//----------------------------------------------------------------------------------------------
-				fprintf(stderr, "ƒ}ƒbƒ`ƒ“ƒOˆ—‚ªI—¹‚µ‚Ü‚µ‚½B\n");
+				fprintf(stderr, "ãƒãƒƒãƒãƒ³ã‚°å‡¦ç†ãŒçµ‚äº†ã—ã¾ã—ãŸã€‚\n");
 
-				printf("\n\n—Ş—“x%.1f%%ˆÈã‚ÌŒŸoŒ‹‰Ê\n‘S%d–‡’† %d–‡ŒŸo‚Å‚«‚Ü‚µ‚½.\n\n", config_val*100.0 ,num_bmp, num_effected);
-				printf("---------ŒŸo”‚ª­‚È‚¢ê‡‚Ì‘Îˆ---------\n");
-				printf("¦ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚âConfig.txt‚ğ•ÏX‚µÄ“xMatch Template‚ÌÀs.\n");
+				printf("\n\né¡ä¼¼åº¦%.1f%%ä»¥ä¸Šã®æ¤œå‡ºçµæœ\nå…¨%dæšä¸­ %dæšæ¤œå‡ºã§ãã¾ã—ãŸ.\n\n", config_val*100.0 ,num_bmp, num_effected);
+				printf("---------æ¤œå‡ºæ•°ãŒå°‘ãªã„å ´åˆã®å¯¾å‡¦---------\n");
+				printf("â€»ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã‚„Config.txtã‚’å¤‰æ›´ã—å†åº¦Match Templateã®å®Ÿè¡Œ.\n");
 				cvShowImage("Camera", image1);
 				D(key);
 			}
 			fclose(file);
 		}
-		/*MƒL[*/if (key == 'm'||key=='4'){
-			//ƒ}ƒbƒ`ƒeƒ“ƒvƒŒ[ƒg
+		/*Mã‚­ãƒ¼*/if (key == 'm'||key=='4'){
+			//ãƒãƒƒãƒãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆ
 			int num_bmp = 0;
 			int num_effected = 0;
 			IplImage *tmp_img;
-			double val4files[FILECOUNT_MAX];//—Ş—“x
-			char XYpoint[FILECOUNT_MAX][20];//À•Wæ“¾‚Ì•¶š—ñ20•¶š
+			double val4files[FILECOUNT_MAX];//é¡ä¼¼åº¦
+			char XYpoint[FILECOUNT_MAX][20];//åº§æ¨™å–å¾—ã®æ–‡å­—åˆ—20æ–‡å­—
 			for (int i1 = 0; i1 < FILECOUNT_MAX; i1++){
 				val4files[i1] = -0.01;
 			}
 
 			//cvDestroyAllWindows();
 			//--------------------------------------------------------------------------------------
-			printf("\n\n‰ğÍˆ—‚ğs‚¢‚Ü‚·.\n");
-			// precheck for Œ‹‰Êƒf[ƒ^
-			sprintf_s(strR, "%s\\”’lƒf[ƒ^\\Œ‹‰Êƒf[ƒ^.csv", FolderName);
+			printf("\n\nè§£æå‡¦ç†ã‚’è¡Œã„ã¾ã™.\n");
+			// precheck for çµæœãƒ‡ãƒ¼ã‚¿
+			sprintf_s(strR, "%s\\æ•°å€¤ãƒ‡ãƒ¼ã‚¿\\çµæœãƒ‡ãƒ¼ã‚¿.csv", FolderName);
 			if (error = fopen_s(&file, strR, "w") != 0){
 				printf("%s\n", strR);
-				fprintf(stderr, "Œ‹‰Êƒf[ƒ^‚É‘‚«‚ß‚Ü‚¹‚ñ.ˆ—‚ğ’†’f‚µ‚Ü‚·.\n");
-				fprintf(stderr, "iExcel‚È‚Ç‚ÅŠJ‚¢‚Ä‚¢‚é‚Æ‘‚«‚ß‚Ü‚¹‚ñ‚Ì‚Å•Â‚¶‚Ä‚­‚¾‚³‚¢.j\n\n");
+				fprintf(stderr, "çµæœãƒ‡ãƒ¼ã‚¿ã«æ›¸ãè¾¼ã‚ã¾ã›ã‚“.å‡¦ç†ã‚’ä¸­æ–­ã—ã¾ã™.\n");
+				fprintf(stderr, "ï¼ˆExcelãªã©ã§é–‹ã„ã¦ã„ã‚‹ã¨æ›¸ãè¾¼ã‚ã¾ã›ã‚“ã®ã§é–‰ã˜ã¦ãã ã•ã„.ï¼‰\n\n");
 				cvShowImage("Camera", image1);
 				D('d');
 				continue;
@@ -709,23 +710,23 @@ int main(int argc, char **argv)
 			//for csv
 			int myFILECOUNT = fscanClock();
 			if (myFILECOUNT ==-1){
-				fprintf(stderr, "B‰eƒf[ƒ^‚ª‚ ‚è‚Ü‚¹‚ñ.\n");
-				fprintf(stderr, "B‰e‚ğs‚Á‚Ä‚­‚¾‚³‚¢.\n\n");
+				fprintf(stderr, "æ’®å½±ãƒ‡ãƒ¼ã‚¿ãŒã‚ã‚Šã¾ã›ã‚“.\n");
+				fprintf(stderr, "æ’®å½±ã‚’è¡Œã£ã¦ãã ã•ã„.\n\n");
 				cvShowImage("Camera", image1);
 				D('b');
 				continue;
 			}
 			//--------------------------------------------------------------------------------------
-			printf("%dŒÂ‚Ìƒeƒ“ƒvƒŒ[ƒgƒ}ƒbƒ`ƒ“ƒOˆ—‚ğs‚¢‚Ü‚·B­X‚¨‘Ò‚¿‚­‚¾‚³‚¢B\n",myFILECOUNT);
+			printf("%då€‹ã®ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆãƒãƒƒãƒãƒ³ã‚°å‡¦ç†ã‚’è¡Œã„ã¾ã™ã€‚å°‘ã€…ãŠå¾…ã¡ãã ã•ã„ã€‚\n",myFILECOUNT);
 
-			//“Ç‚İ‚İ
-			sprintf_s(strR, "%s\\ƒeƒ“ƒvƒŒ[ƒg.bmp", FolderName);						//template picture as bmp format
+			//èª­ã¿è¾¼ã¿
+			sprintf_s(strR, "%s\\ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆ.bmp", FolderName);						//template picture as bmp format
 			tmp_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 
-			//“Ç‚İ‚İ¸”s
+			//èª­ã¿è¾¼ã¿å¤±æ•—
 			if (tmp_img == NULL) {
-				fprintf(stderr, "ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚Ì“Ç‚İ‚É¸”s‚µ‚Ü‚µ‚½.\n");
-				fprintf(stderr, "ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚ğì¬‚µ‚Ä‚­‚¾‚³‚¢.\n\n");
+				fprintf(stderr, "ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã®èª­è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸ.\n");
+				fprintf(stderr, "ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã‚’ä½œæˆã—ã¦ãã ã•ã„.\n\n");
 				cvShowImage("Camera", image1);
 				D('d');
 				continue;
@@ -733,9 +734,9 @@ int main(int argc, char **argv)
 
 
 			//read config.txt
-			if (error = fopen_s(&file_config, "./ÀŒ±ƒtƒHƒ‹ƒ_/Config.txt", "r") != 0){
-				fprintf(stderr, "Config.txt ‚Ì“Ç‚İ‚É¸”s‚µ‚Ü‚µ‚½.\n");
-				fprintf(stderr, "Ä‹N“®‚µ‚Ä‚­‚¾‚³‚¢.\n\n");
+			if (error = fopen_s(&file_config, "./å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€/Config.txt", "r") != 0){
+				fprintf(stderr, "Config.txt ã®èª­è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸ.\n");
+				fprintf(stderr, "å†èµ·å‹•ã—ã¦ãã ã•ã„.\n\n");
 				cvShowImage("Camera", image1);
 				D('d');
 				continue;
@@ -747,28 +748,28 @@ int main(int argc, char **argv)
 			}
 			bool use_src_img = FALSE;
 			for (i = 0; i < myFILECOUNT; i++){
-				sprintf_s(strR, "%s\\B‰e‰æ‘œ\\outputpic_%04d.bmp", FolderName, i);
+				sprintf_s(strR, "%s\\æ’®å½±ç”»åƒ\\outputpic_%04d.bmp", FolderName, i);
 				if (use_src_img){
 					cvReleaseImage(&src_img);
 				}
 				src_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 				use_src_img = TRUE;
 
-				//“Ç‚İ‚İ¸”s
+				//èª­ã¿è¾¼ã¿å¤±æ•—
 				if (src_img == NULL) {
-					printf("B‰e‰æ‘œ‚Ì“Ç‚İ‚É¸”s‚µ‚Ü‚µ‚½.\n");
+					printf("æ’®å½±ç”»åƒã®èª­è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸ.\n");
 				}
 				else{
 					num_bmp++;
 					printf("outputpic_%04d.bmp:", i);
-					// (1)’Tõ‰æ‘œ‘S‘Ì‚É‘Î‚µ‚ÄCƒeƒ“ƒvƒŒ[ƒg‚Ìƒ}ƒbƒ`ƒ“ƒO’liw’è‚µ‚½è–@‚ÉˆË‘¶j‚ğŒvZ
+					// (1)æ¢ç´¢ç”»åƒå…¨ä½“ã«å¯¾ã—ã¦ï¼Œãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã®ãƒãƒƒãƒãƒ³ã‚°å€¤ï¼ˆæŒ‡å®šã—ãŸæ‰‹æ³•ã«ä¾å­˜ï¼‰ã‚’è¨ˆç®—
 					dst_size = cvSize(src_img->width - tmp_img->width + 1, src_img->height - tmp_img->height + 1);
 					dst_img = cvCreateImage(dst_size, IPL_DEPTH_32F, 1);
-					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);				//method‚à•Ï‚¦‚Â‚ÂŒŸØ‚ª•K—v
+					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);				//methodã‚‚å¤‰ãˆã¤ã¤æ¤œè¨¼ãŒå¿…è¦
 
 					cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
 
-					/*150”Ô–Ú‚Ì—Ş—“xŠm”F—p*/
+					/*150ç•ªç›®ã®é¡ä¼¼åº¦ç¢ºèªç”¨*/
 					if (i == 150){
 						img_ccoeff = dst_img;
 						cvMinMaxLoc(img_ccoeff, &Cmin, &Cmax, &Pmin, &Pmax, NULL);
@@ -777,33 +778,33 @@ int main(int argc, char **argv)
 					cvReleaseImage(&dst_img);
 					val4files[i] = max_val;
 	
-					if (val4files[i] < config_val){//ƒeƒ“ƒvƒŒ[ƒg‚Æ’Tõ‘ÎÛ‚Ì—Ş—“x‚ªconfig_val –¢–
-						//X,YÀ•W‚Ìo—Í - for csv
+					if (val4files[i] < config_val){//ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã¨æ¢ç´¢å¯¾è±¡ã®é¡ä¼¼åº¦ãŒconfig_val æœªæº€
+						//X,Yåº§æ¨™ã®å‡ºåŠ› - for csv
 						sprintf_s(XYpoint[i], ",%02d,%02d", 0, 0);
-						printf("—Ş—“x%.1f(%.1f%%–¢–)\n", max_val*100.0, config_val*100.0);
+						printf("é¡ä¼¼åº¦%.1f(%.1f%%æœªæº€)\n", max_val*100.0, config_val*100.0);
 
-						cvRectangle(src_img, max_loc, cvPoint(max_loc.x + tmp_img->width, max_loc.y + tmp_img->height), CV_RGB(255, 0, 0), 2);//Ô˜glŠp‚ğ•`‰æ
-						cvCircle(src_img, cvPoint(max_loc.x + tmp_img->width / 2, max_loc.y + tmp_img->height / 2), 1, CV_RGB(0, 255, 0), -1, 8);//’†S•`‰æ
+						cvRectangle(src_img, max_loc, cvPoint(max_loc.x + tmp_img->width, max_loc.y + tmp_img->height), CV_RGB(255, 0, 0), 2);//èµ¤æ å››è§’ã‚’æç”»
+						cvCircle(src_img, cvPoint(max_loc.x + tmp_img->width / 2, max_loc.y + tmp_img->height / 2), 1, CV_RGB(0, 255, 0), -1, 8);//ä¸­å¿ƒæç”»
 
-						cvPutText(src_img, sprintClockwPer(i,(int)(val4files[i]*100.0)), cvPoint(20, 25), &font_w, CV_RGB(255, 255, 255));	//”’‰
-						cvPutText(src_img, sprintClockwPer(i, (int)(val4files[i] * 100.0)), cvPoint(20, 25), &font, CV_RGB(200, 0, 0));			//Ô•¶š
+						cvPutText(src_img, sprintClockwPer(i,(int)(val4files[i]*100.0)), cvPoint(20, 25), &font_w, CV_RGB(255, 255, 255));	//ç™½ç¸
+						cvPutText(src_img, sprintClockwPer(i, (int)(val4files[i] * 100.0)), cvPoint(20, 25), &font, CV_RGB(200, 0, 0));			//èµ¤æ–‡å­—
 
-						sprintf_s(strR, "%s\\ˆ—‰æ‘œ\\Effected_%04d.bmp", FolderName, i);
+						sprintf_s(strR, "%s\\å‡¦ç†ç”»åƒ\\Effected_%04d.bmp", FolderName, i);
 						cvSaveImage(strR, src_img);
 						cvShowImage("Camera", src_img);
 						cvWaitKey(2);
 					}
 					else{
-						// (2)ƒeƒ“ƒvƒŒ[ƒg‚É‘Î‰‚·‚éˆÊ’u‚É‹éŒ`‚ğ•`‰æA’†S“_‚à•`‰æ
-						cvRectangle(src_img, max_loc, cvPoint(max_loc.x + tmp_img->width, max_loc.y + tmp_img->height), CV_RGB(0, 0, 255), 2);//Â˜glŠp‚ğ•`‰æ
-						cvCircle(src_img, cvPoint(max_loc.x + tmp_img->width / 2, max_loc.y + tmp_img->height / 2), 1, CV_RGB(0, 255, 0), -1, 8);//’†S•`‰æ
-						//ƒ^ƒCƒ€ƒXƒ^ƒ“ƒv
+						// (2)ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã«å¯¾å¿œã™ã‚‹ä½ç½®ã«çŸ©å½¢ã‚’æç”»ã€ä¸­å¿ƒç‚¹ã‚‚æç”»
+						cvRectangle(src_img, max_loc, cvPoint(max_loc.x + tmp_img->width, max_loc.y + tmp_img->height), CV_RGB(0, 0, 255), 2);//é’æ å››è§’ã‚’æç”»
+						cvCircle(src_img, cvPoint(max_loc.x + tmp_img->width / 2, max_loc.y + tmp_img->height / 2), 1, CV_RGB(0, 255, 0), -1, 8);//ä¸­å¿ƒæç”»
+						//ã‚¿ã‚¤ãƒ ã‚¹ã‚¿ãƒ³ãƒ—
 
-						cvPutText(src_img, sprintClockwPer(i, (int)(val4files[i] * 100.0)), cvPoint(20, 25), &font_w, CV_RGB(255, 255, 255));	//”’‰
-						cvPutText(src_img, sprintClockwPer(i, (int)(val4files[i] * 100.0)), cvPoint(20, 25), &font, CV_RGB(0, 0, 0));			//••¶š
+						cvPutText(src_img, sprintClockwPer(i, (int)(val4files[i] * 100.0)), cvPoint(20, 25), &font_w, CV_RGB(255, 255, 255));	//ç™½ç¸
+						cvPutText(src_img, sprintClockwPer(i, (int)(val4files[i] * 100.0)), cvPoint(20, 25), &font, CV_RGB(0, 0, 0));			//é»’æ–‡å­—
 
 						num_effected++;
-						sprintf_s(strR, "%s\\ˆ—‰æ‘œ\\Effected_%04d.bmp", FolderName, i);
+						sprintf_s(strR, "%s\\å‡¦ç†ç”»åƒ\\Effected_%04d.bmp", FolderName, i);
 						cvSaveImage(strR, src_img);
 						cvShowImage("Camera", src_img);
 						cvWaitKey(2);
@@ -812,9 +813,9 @@ int main(int argc, char **argv)
 							max = test;
 							M = i;
 						}
-						//X,YÀ•W‚Ìo—Í - for csv
+						//X,Yåº§æ¨™ã®å‡ºåŠ› - for csv
 						sprintf_s(XYpoint[i], ",%02d,%02d", (max_loc.x + tmp_img->width / 2), (max_loc.y + tmp_img->height / 2));
-						printf("Effected_%04d.bmp ì¬ (—Ş—“x%.1f%%)\n", i, max_val*100.0);
+						printf("Effected_%04d.bmp ä½œæˆ (é¡ä¼¼åº¦%.1f%%)\n", i, max_val*100.0);
 
 					}
 				}
@@ -824,74 +825,74 @@ int main(int argc, char **argv)
 				cvReleaseImage(&src_img);
 			}
 			cvReleaseImage(&tmp_img);
-			//Œ‹‰Êƒf[ƒ^‚Ì‘‚«‚İ
-			sprintf_s(strR, "%s\\”’lƒf[ƒ^\\Œ‹‰Êƒf[ƒ^.csv", FolderName);
+			//çµæœãƒ‡ãƒ¼ã‚¿ã®æ›¸ãè¾¼ã¿
+			sprintf_s(strR, "%s\\æ•°å€¤ãƒ‡ãƒ¼ã‚¿\\çµæœãƒ‡ãƒ¼ã‚¿.csv", FolderName);
 			if (error = fopen_s(&file, strR, "w") != 0){
 				printf("%s\n", strT);
-				fprintf(stderr, "Œ‹‰Êƒf[ƒ^‚É‘‚«‚ß‚Ü‚¹‚ñ.\n");
-				fprintf(stderr, "iExcel‚È‚Ç‚ÅŠJ‚¢‚Ä‚¢‚é‚Æ‘‚«‚ß‚Ü‚¹‚ñ.j\n\n");
+				fprintf(stderr, "çµæœãƒ‡ãƒ¼ã‚¿ã«æ›¸ãè¾¼ã‚ã¾ã›ã‚“.\n");
+				fprintf(stderr, "ï¼ˆExcelãªã©ã§é–‹ã„ã¦ã„ã‚‹ã¨æ›¸ãè¾¼ã‚ã¾ã›ã‚“.ï¼‰\n\n");
 				cvShowImage("Camera", image1);
 				D('d');
 				continue;
 			}
 
 			//----------------------------------------------------------------------------------------------
-			//Œ‹‰ÊCSV1s–Ú‚Ì‹Lq
-			//fprintf(file, "‰æ‘œƒtƒ@ƒCƒ‹–¼,,•ª,•b,ƒ~ƒŠ•b,Œo‰ßŠÔ,t(s),x[pixel],y[pixel],X[meter],Y[meter],,ƒ{[ƒ‹‚Ì’¼Œa(ƒ[ƒgƒ‹)¨,(ƒ{[ƒ‹‚Ì’¼Œa‚ğ“ü—Í),ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚Å‚ÌƒsƒNƒZƒ‹ƒTƒCƒY¨,(ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚Ì‰¡ƒTƒCƒY‚ğ“ü—Í,1ƒsƒNƒZƒ‹‚ ‚½‚èƒ[ƒgƒ‹o—Í¨,=$N$1/$P$1\n");
-			fprintf(file, "‰æ‘œƒtƒ@ƒCƒ‹–¼,Œo‰ßŠÔ,t(s),x[pixel],y[pixel],X[meter],Y[meter],,ƒ{[ƒ‹‚Ì’¼Œa(ƒ[ƒgƒ‹)¨,(ƒ{[ƒ‹‚Ì’¼Œa‚ğ“ü—Í),ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚Å‚ÌƒsƒNƒZƒ‹ƒTƒCƒY¨,(ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚Ì‰¡ƒTƒCƒY‚ğ“ü—Í,1ƒsƒNƒZƒ‹‚ ‚½‚èƒ[ƒgƒ‹o—Í¨,=$J$1/$L$1\n");
+			//çµæœCSV1è¡Œç›®ã®è¨˜è¿°
+			//fprintf(file, "ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«å,æ™‚,åˆ†,ç§’,ãƒŸãƒªç§’,çµŒéæ™‚é–“,t(s),x[pixel],y[pixel],X[meter],Y[meter],,ãƒœãƒ¼ãƒ«ã®ç›´å¾„(ãƒ¡ãƒ¼ãƒˆãƒ«)â†’,(ãƒœãƒ¼ãƒ«ã®ç›´å¾„ã‚’å…¥åŠ›),ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã§ã®ãƒ”ã‚¯ã‚»ãƒ«ã‚µã‚¤ã‚ºâ†’,(ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã®æ¨ªã‚µã‚¤ã‚ºã‚’å…¥åŠ›,1ãƒ”ã‚¯ã‚»ãƒ«ã‚ãŸã‚Šãƒ¡ãƒ¼ãƒˆãƒ«å‡ºåŠ›â†’,=$N$1/$P$1\n");
+			fprintf(file, "ç”»åƒãƒ•ã‚¡ã‚¤ãƒ«å,çµŒéæ™‚é–“,t(s),x[pixel],y[pixel],X[meter],Y[meter],,ãƒœãƒ¼ãƒ«ã®ç›´å¾„(ãƒ¡ãƒ¼ãƒˆãƒ«)â†’,(ãƒœãƒ¼ãƒ«ã®ç›´å¾„ã‚’å…¥åŠ›),ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã§ã®ãƒ”ã‚¯ã‚»ãƒ«ã‚µã‚¤ã‚ºâ†’,(ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã®æ¨ªã‚µã‚¤ã‚ºã‚’å…¥åŠ›,1ãƒ”ã‚¯ã‚»ãƒ«ã‚ãŸã‚Šãƒ¡ãƒ¼ãƒˆãƒ«å‡ºåŠ›â†’,=$J$1/$L$1\n");
 
 			if (num_effected != 0){
-				//Šes‚Ì‹Lq
+				//å„è¡Œã®è¨˜è¿°
 				int c = 2; // line number of csv file (start from 2)
 				for (i = 0; i < myFILECOUNT; i++){
 					if (val4files[i] <config_val){
 						//printf("%d skiped\n",i);
 						//getchar();
 					}
-					//”’lƒf[ƒ^‚Éƒtƒ@ƒCƒ‹–¼‚È‚ÇÀ•WAƒGƒNƒZƒ‹ã‚Å‚ÌŒvZ®‚ğo—Í‚³‚¹‚é
+					//æ•°å€¤ãƒ‡ãƒ¼ã‚¿ã«ãƒ•ã‚¡ã‚¤ãƒ«åãªã©åº§æ¨™ã€ã‚¨ã‚¯ã‚»ãƒ«ä¸Šã§ã®è¨ˆç®—å¼ã‚’å‡ºåŠ›ã•ã›ã‚‹
 					else{
 						char FName[50];
 						sprintf_s(FName, "img_%04d.bmp,%s", i, sprintClock(i));
-						fprintf(file, FName);				//ƒtƒ@ƒCƒ‹–¼&ƒf[ƒ^‚ğo—Í
-						//fprintf(file, ",= B%d *60*60*100 + C%d * 60 *1000 + D%d * 1000 + E%d", c, c, c, c);		//•bDƒ~ƒŠ•bÀ•W‚ğ”’lƒf[ƒ^o—Í
-						//fprintf(file, ",= (F%d - $F$2)/1000", c);		//‚PƒtƒŒ[ƒ€‚²‚Æ‚ÌŠÔÀ•W‚ğ”’lƒf[ƒ^o—Í
-						fprintf(file, ",= B%d - $B$2", c);		//‚PƒtƒŒ[ƒ€‚²‚Æ‚ÌŠÔÀ•W‚ğ”’lƒf[ƒ^o—Í
-						fprintf(file, XYpoint[i]);		//XYÀ•W‚ğ”’lƒf[ƒ^o—Í
-						//fprintf(file, ",=(H%d-$H$2)*$R$1,=(I%d-$I$2)*$R$1", c, c);		//x‚Æy‚ğ”’lƒf[ƒ^o—Í
-						fprintf(file, ",=(D%d-$D$2)*$N$1,=(E%d-$E$2)*$N$1", c, c);		//x‚Æy‚ğ”’lƒf[ƒ^o—Í
+						fprintf(file, FName);				//ãƒ•ã‚¡ã‚¤ãƒ«å&æ™‚åˆ»ãƒ‡ãƒ¼ã‚¿ã‚’å‡ºåŠ›
+						//fprintf(file, ",= B%d *60*60*100 + C%d * 60 *1000 + D%d * 1000 + E%d", c, c, c, c);		//ç§’ï¼ãƒŸãƒªç§’åº§æ¨™ã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
+						//fprintf(file, ",= (F%d - $F$2)/1000", c);		//ï¼‘ãƒ•ãƒ¬ãƒ¼ãƒ ã”ã¨ã®æ™‚é–“åº§æ¨™ã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
+						fprintf(file, ",= B%d - $B$2", c);		//ï¼‘ãƒ•ãƒ¬ãƒ¼ãƒ ã”ã¨ã®æ™‚é–“åº§æ¨™ã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
+						fprintf(file, XYpoint[i]);		//XYåº§æ¨™ã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
+						//fprintf(file, ",=(H%d-$H$2)*$R$1,=(I%d-$I$2)*$R$1", c, c);		//xã¨yã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
+						fprintf(file, ",=(D%d-$D$2)*$N$1,=(E%d-$E$2)*$N$1", c, c);		//xã¨yã‚’æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›
 
-						fprintf(file, "\n");			//‰üs‚µ‚È‚¢‚Æ‰¡1—ñ‚É‚È‚é
+						fprintf(file, "\n");			//æ”¹è¡Œã—ãªã„ã¨æ¨ª1åˆ—ã«ãªã‚‹
 						c++;
 					}
 				}
 			}
 			fclose(file);
 
-			printf("”’lƒf[ƒ^o—Í‚ªI—¹‚µ‚Ü‚µ‚½.\n");
+			printf("æ•°å€¤ãƒ‡ãƒ¼ã‚¿å‡ºåŠ›ãŒçµ‚äº†ã—ã¾ã—ãŸ.\n");
 
 			//----------------------------------------------------------------------------------------------
-			fprintf(stderr, "ƒ}ƒbƒ`ƒ“ƒOˆ—‚ªI—¹‚µ‚Ü‚µ‚½B\n");
+			fprintf(stderr, "ãƒãƒƒãƒãƒ³ã‚°å‡¦ç†ãŒçµ‚äº†ã—ã¾ã—ãŸã€‚\n");
 
 
-			printf("\n\n—Ş—“x%.1f%%ˆÈã‚ÌŒŸoŒ‹‰Ê\n‘S%d–‡’† %d–‡ŒŸo‚Å‚«‚Ü‚µ‚½.\n\n", config_val*100.0, num_bmp, num_effected);
-			printf("---------ŒŸo”‚ª­‚È‚¢ê‡‚Ì‘Îˆ---------\n");
-			printf("¦ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚âConfig.txt‚ğ•ÏX‚µÄ“xMatch Template‚ÌÀs.\n");
+			printf("\n\né¡ä¼¼åº¦%.1f%%ä»¥ä¸Šã®æ¤œå‡ºçµæœ\nå…¨%dæšä¸­ %dæšæ¤œå‡ºã§ãã¾ã—ãŸ.\n\n", config_val*100.0, num_bmp, num_effected);
+			printf("---------æ¤œå‡ºæ•°ãŒå°‘ãªã„å ´åˆã®å¯¾å‡¦---------\n");
+			printf("â€»ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã‚„Config.txtã‚’å¤‰æ›´ã—å†åº¦Match Templateã®å®Ÿè¡Œ.\n");
 			cvShowImage("Camera", image1);
 			D(key);
 
 
 		}
 		if (key == 'R' ){ 
-			fprintf(stderr, "ƒ}ƒbƒ`ƒ“ƒO‚ÌƒeƒXƒg‚ğs‚¢‚Ü‚·.(Space key ‚ÅI—¹).\n");
+			fprintf(stderr, "ãƒãƒƒãƒãƒ³ã‚°ã®ãƒ†ã‚¹ãƒˆã‚’è¡Œã„ã¾ã™.(Space key ã§çµ‚äº†).\n");
 			IplImage *tmp_img;
 			IplImage *tmp_img2;
 
-			//ƒeƒ“ƒvƒŒ[ƒg“Ç‚İ‚İ
-			sprintf_s(strR, "%s\\ƒeƒ“ƒvƒŒ[ƒg.bmp", FolderName);						//template picture as bmp format
+			//ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆèª­ã¿è¾¼ã¿
+			sprintf_s(strR, "%s\\ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆ.bmp", FolderName);						//template picture as bmp format
 			tmp_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
-			if (tmp_img == NULL) {//“Ç‚İ‚İ¸”s
-				fprintf(stderr, "ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚Ì“Ç‚İ‚É¸”s‚µ‚Ü‚µ‚½.\n");
-				fprintf(stderr, "ƒeƒ“ƒvƒŒ[ƒg‰æ‘œ‚ğì¬‚µ‚Ä‚­‚¾‚³‚¢.\n\n");
+			if (tmp_img == NULL) {//èª­ã¿è¾¼ã¿å¤±æ•—
+				fprintf(stderr, "ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã®èª­è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸ.\n");
+				fprintf(stderr, "ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”»åƒã‚’ä½œæˆã—ã¦ãã ã•ã„.\n\n");
 				cvShowImage("Camera", image1);
 				D('d');
 				continue;
@@ -900,9 +901,9 @@ int main(int argc, char **argv)
 			cvCopy(tmp_img, tmp_img2);
 
 			//read config.txt
-			if (error = fopen_s(&file_config, "./ÀŒ±ƒtƒHƒ‹ƒ_/Config.txt", "r") != 0){
-				fprintf(stderr, "Config.txt ‚Ì“Ç‚İ‚É¸”s‚µ‚Ü‚µ‚½.\n");
-				fprintf(stderr, "Ä‹N“®‚µ‚Ä‚­‚¾‚³‚¢.\n\n");
+			if (error = fopen_s(&file_config, "./å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€/Config.txt", "r") != 0){
+				fprintf(stderr, "Config.txt ã®èª­è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸ.\n");
+				fprintf(stderr, "å†èµ·å‹•ã—ã¦ãã ã•ã„.\n\n");
 				cvShowImage("Camera", image1);
 				D('d');
 				continue;
@@ -912,7 +913,7 @@ int main(int argc, char **argv)
 				fclose(file_config);
 			}
 
-			//–³ŒÀƒ‹[ƒvˆ—
+			//ç„¡é™ãƒ«ãƒ¼ãƒ—å‡¦ç†
 			startClock();
 			int i = 0;
 			int tw, th;
@@ -921,18 +922,18 @@ int main(int argc, char **argv)
 			bool q_const = TRUE;
 			while (1){
 				if (GetAsyncKeyState(VK_SPACE) & 0x8000){
-					printf("Space key‚ª“ü—Í‚³‚ê‚Ü‚µ‚½B‹L˜^‚ğI—¹‚µ‚Ü‚·B");
+					printf("Space keyãŒå…¥åŠ›ã•ã‚Œã¾ã—ãŸã€‚è¨˜éŒ²ã‚’çµ‚äº†ã—ã¾ã™ã€‚");
 					break;
 				}
 				if (GetAsyncKeyState(VK_RETURN) & 0x8000){
-					printf("ENTER key‚ª“ü—Í‚³‚ê‚Ü‚µ‚½.");
+					printf("ENTER keyãŒå…¥åŠ›ã•ã‚Œã¾ã—ãŸ.");
 					cvWaitKey(100);
 					q_const = (!q_const);
 					if (q_const){
-						printf("’èí’ÇÕƒ‚[ƒh‚É•ÏX‚µ‚Ü‚µ‚½\n");
+						printf("å®šå¸¸è¿½è·¡ãƒ¢ãƒ¼ãƒ‰ã«å¤‰æ›´ã—ã¾ã—ãŸ\n");
 					}
 					else{
-						printf("“®“I’ÇÕƒ‚[ƒh‚É•ÏX‚µ‚Ü‚µ‚½\n");
+						printf("å‹•çš„è¿½è·¡ãƒ¢ãƒ¼ãƒ‰ã«å¤‰æ›´ã—ã¾ã—ãŸ\n");
 					}
 				}
 
@@ -941,20 +942,20 @@ int main(int argc, char **argv)
 				src_img = cvCloneImage(image1);
 
 				saveClock(i);
-				// (1)’Tõ‰æ‘œsrc_img ‘S‘Ì‚É‘Î‚µ‚ÄCƒeƒ“ƒvƒŒ[ƒg‚Ìƒ}ƒbƒ`ƒ“ƒO’liw’è‚µ‚½è–@‚ÉˆË‘¶j‚ğŒvZ
+				// (1)æ¢ç´¢ç”»åƒsrc_img å…¨ä½“ã«å¯¾ã—ã¦ï¼Œãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã®ãƒãƒƒãƒãƒ³ã‚°å€¤ï¼ˆæŒ‡å®šã—ãŸæ‰‹æ³•ã«ä¾å­˜ï¼‰ã‚’è¨ˆç®—
 				dst_size = cvSize(src_img->width - tmp_img->width + 1, src_img->height - tmp_img->height + 1);
 				dst_img = cvCreateImage(dst_size, IPL_DEPTH_32F, 1);
 				if (q_const){
-					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);				//’èí’ÇÕ
+					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);				//å®šå¸¸è¿½è·¡
 				}
 				else{
-					cvMatchTemplate(src_img, tmp_img2, dst_img, CV_TM_CCOEFF_NORMED);				//“®“I’ÇÕ
+					cvMatchTemplate(src_img, tmp_img2, dst_img, CV_TM_CCOEFF_NORMED);				//å‹•çš„è¿½è·¡
 				}
 				cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
 				cvReleaseImage(&dst_img);
 
 			
-				//“®“I’ÇÕ—p‚É tmp_img2 ‚ğ•ÏX
+				//å‹•çš„è¿½è·¡ç”¨ã« tmp_img2 ã‚’å¤‰æ›´
 				if (max_val < config_val){
 					cvCopy(tmp_img, tmp_img2);
 				}
@@ -965,17 +966,17 @@ int main(int argc, char **argv)
 					cvResetImageROI(src_img);
 				}
 
-				// (2)ƒeƒ“ƒvƒŒ[ƒg‚É‘Î‰‚·‚éˆÊ’u‚É‹éŒ`‚ğ•`‰æA’†S“_‚à•`‰æ
+				// (2)ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã«å¯¾å¿œã™ã‚‹ä½ç½®ã«çŸ©å½¢ã‚’æç”»ã€ä¸­å¿ƒç‚¹ã‚‚æç”»
 				CvScalar cvrgb1 = CV_RGB(0, 0, 255);
 				CvScalar cvrgb2 = CV_RGB(0,0,0);
-				if (max_val < config_val){//ƒeƒ“ƒvƒŒ[ƒg‚Æ’Tõ‘ÎÛ‚Ì—Ş—“x‚ªconfig_val –¢–
+				if (max_val < config_val){//ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã¨æ¢ç´¢å¯¾è±¡ã®é¡ä¼¼åº¦ãŒconfig_val æœªæº€
 					cvrgb1 = CV_RGB(255, 0, 0);
 					cvrgb2 = CV_RGB(200, 0, 0);
 				}
-				cvRectangle(src_img, max_loc, cvPoint(max_loc.x + tw, max_loc.y + th), cvrgb1, 2);//˜glŠp‚ğ•`‰æ
-				cvCircle(src_img, cvPoint(max_loc.x + tw / 2, max_loc.y + th / 2), 1, CV_RGB(0, 255, 0), -1, 8);//’†S•`‰æ
-				cvPutText(src_img, sprintClockwPer(i, (int)(max_val * 100.0)), cvPoint(20, 25), &font_w, CV_RGB(255, 255, 255));	//”’‰
-				cvPutText(src_img, sprintClockwPer(i, (int)(max_val * 100.0)), cvPoint(20, 25), &font, cvrgb2);			//•¶š
+				cvRectangle(src_img, max_loc, cvPoint(max_loc.x + tw, max_loc.y + th), cvrgb1, 2);//æ å››è§’ã‚’æç”»
+				cvCircle(src_img, cvPoint(max_loc.x + tw / 2, max_loc.y + th / 2), 1, CV_RGB(0, 255, 0), -1, 8);//ä¸­å¿ƒæç”»
+				cvPutText(src_img, sprintClockwPer(i, (int)(max_val * 100.0)), cvPoint(20, 25), &font_w, CV_RGB(255, 255, 255));	//ç™½ç¸
+				cvPutText(src_img, sprintClockwPer(i, (int)(max_val * 100.0)), cvPoint(20, 25), &font, cvrgb2);			//æ–‡å­—
 
 				cvShowImage("Camera", src_img);
 				cvWaitKey(2);
@@ -1000,36 +1001,36 @@ int main(int argc, char **argv)
 		if (key == '?' || key == 'h' || key == 'H'){
 			D0();
 		}
-		/*vƒL[*/if (key == 'v'||key=='V'||key=='9'){
+		/*vã‚­ãƒ¼*/if (key == 'v'||key=='V'||key=='9'){
 			//--------------------------------------------------------------------------------------
 			//for csv
 			int myFILECOUNT = fscanClock();
 			if (myFILECOUNT == -1){
-				fprintf(stderr, "B‰eƒf[ƒ^‚ª‚ ‚è‚Ü‚¹‚ñ.\n");
-				fprintf(stderr, "B‰e‚ğs‚Á‚Ä‚­‚¾‚³‚¢.\n\n");
+				fprintf(stderr, "æ’®å½±ãƒ‡ãƒ¼ã‚¿ãŒã‚ã‚Šã¾ã›ã‚“.\n");
+				fprintf(stderr, "æ’®å½±ã‚’è¡Œã£ã¦ãã ã•ã„.\n\n");
 				D('b');
 				continue;
 			}
-			printf("\n\n%d–‡‚ÌB‰eƒf[ƒ^‚ğ•\¦‚µ‚Ü‚·.\n",myFILECOUNT);
+			printf("\n\n%dæšã®æ’®å½±ãƒ‡ãƒ¼ã‚¿ã‚’è¡¨ç¤ºã—ã¾ã™.\n",myFILECOUNT);
 			//--------------------------------------------------------------------------------------
 			bool use_src_img = FALSE;
 			for (i = 0; i < myFILECOUNT; i++){
 				if (GetAsyncKeyState(VK_SPACE) & 0x8000){
-					printf("Space key‚ª“ü—Í‚³‚ê‚Ü‚µ‚½B‹L˜^‚ğI—¹‚µ‚Ü‚·B\n");
+					printf("Space keyãŒå…¥åŠ›ã•ã‚Œã¾ã—ãŸã€‚è¨˜éŒ²ã‚’çµ‚äº†ã—ã¾ã™ã€‚\n");
 					break;
 				}
 
 				if (key == 'V'){
-					sprintf_s(strR, "%s\\B‰e‰æ‘œ\\outputpic_%04d.bmp", FolderName, i);
+					sprintf_s(strR, "%s\\æ’®å½±ç”»åƒ\\outputpic_%04d.bmp", FolderName, i);
 				}
 				else{
-					sprintf_s(strR, "%s\\ˆ—‰æ‘œ\\Effected_%04d.bmp", FolderName, i);
+					sprintf_s(strR, "%s\\å‡¦ç†ç”»åƒ\\Effected_%04d.bmp", FolderName, i);
 				}
 				if (use_src_img) cvReleaseImage(&src_img);
 				src_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
-				//“Ç‚İ‚İ¸”s
+				//èª­ã¿è¾¼ã¿å¤±æ•—
 				if (src_img == NULL) {
-					printf("B‰e‰æ‘œ‚Ì“Ç‚İ‚É¸”s‚µ‚Ü‚µ‚½.\n");
+					printf("æ’®å½±ç”»åƒã®èª­è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸ.\n");
 					continue;
 				}
 				use_src_img = TRUE;
@@ -1054,73 +1055,73 @@ int main(int argc, char **argv)
 	return 0;
 
 }
-/*Å‰‚ÌƒL[ƒ{[ƒhà–¾•\¦*/
-void D0(void)		//ƒL[‘€ìˆê——‚ÌƒeƒLƒXƒg•\¦
+/*æœ€åˆã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰èª¬æ˜è¡¨ç¤º*/
+void D0(void)		//ã‚­ãƒ¼æ“ä½œä¸€è¦§ã®ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤º
 {
 	fprintf(stderr, "--------------------------------------------------------------------------\n");
-	//fprintf(stderr, "¦CameraƒEƒBƒ“ƒhƒE‚ğƒAƒNƒeƒBƒu‚É‚·‚é‚±‚Æ‚ÅƒL[‘€ì‚ª‰Â”\\n\n");
-	fprintf(stderr, " 1 :ƒeƒ“ƒvƒŒ[ƒg—p‰æ‘œ‚Ì•Û‘¶.\n");
-	fprintf(stderr, " 2 :ƒeƒ“ƒvƒŒ[ƒg—p‰æ‘œ‚Ì•ÒWEƒgƒŠƒ~ƒ“ƒO.\n");
-	fprintf(stderr, " 3 :‰æ‘œ‚ğ250–‡•Û‘¶(Spece Key‚Ì“ü—Í‚ÅI—¹).\n");
-	fprintf(stderr, " 4 :ƒeƒ“ƒvƒŒ[ƒgƒ}ƒbƒ`ƒ“ƒO‚ÌÀs,Œ‹‰Êƒf[ƒ^o—Í.\n");
-	fprintf(stderr, " 5 :Œ‹‰Êƒf[ƒ^‚Ì‰ğÍ.\n");
+	//fprintf(stderr, "â€»Cameraã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã«ã™ã‚‹ã“ã¨ã§ã‚­ãƒ¼æ“ä½œãŒå¯èƒ½\n\n");
+	fprintf(stderr, " 1 :ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”¨ç”»åƒã®ä¿å­˜.\n");
+	fprintf(stderr, " 2 :ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”¨ç”»åƒã®ç·¨é›†ãƒ»ãƒˆãƒªãƒŸãƒ³ã‚°.\n");
+	fprintf(stderr, " 3 :ç”»åƒã‚’250æšä¿å­˜(Spece Keyã®å…¥åŠ›ã§çµ‚äº†).\n");
+	fprintf(stderr, " 4 :ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆãƒãƒƒãƒãƒ³ã‚°ã®å®Ÿè¡Œ,çµæœãƒ‡ãƒ¼ã‚¿å‡ºåŠ›.\n");
+	fprintf(stderr, " 5 :çµæœãƒ‡ãƒ¼ã‚¿ã®è§£æ.\n");
 
-	fprintf(stderr, " 0 or q or Esc : ‚±‚ÌƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ğI—¹‚·‚é\n");
-	fprintf(stderr, " 7 :ƒ}ƒbƒ`ƒ“ƒO‚Ì—Ş—“x‚ğ•ÏX‚·‚é\n");
-	fprintf(stderr, " 8 :ƒf[ƒ^ƒRƒs[‚Ì‚½‚ßƒtƒHƒ‹ƒ_‚ğŠJ‚­\n");
-	fprintf(stderr, " 9 :ˆ—‰æ‘œ‚ğ•\¦‚·‚é\n");
-	fprintf(stderr, " t :‰æ‘œ‚ğ–³§ŒÀ‚É•Û‘¶\n");
-	fprintf(stderr, " ÀŒ±ƒtƒHƒ‹ƒ_‚ª‚ ‚é‚±‚Æ‚ğŠm”F‚µ‚ÄAB‰eE‰ğÍ‚ğs‚Á‚Ä‚­‚¾‚³‚¢.\n");
+	fprintf(stderr, " 0 or q or Esc : ã“ã®ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚’çµ‚äº†ã™ã‚‹\n");
+	fprintf(stderr, " 7 :ãƒãƒƒãƒãƒ³ã‚°ã®é¡ä¼¼åº¦ã‚’å¤‰æ›´ã™ã‚‹\n");
+	fprintf(stderr, " 8 :ãƒ‡ãƒ¼ã‚¿ã‚³ãƒ”ãƒ¼ã®ãŸã‚ãƒ•ã‚©ãƒ«ãƒ€ã‚’é–‹ã\n");
+	fprintf(stderr, " 9 :å‡¦ç†ç”»åƒã‚’è¡¨ç¤ºã™ã‚‹\n");
+	fprintf(stderr, " t :ç”»åƒã‚’ç„¡åˆ¶é™ã«ä¿å­˜\n");
+	fprintf(stderr, " å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€ãŒã‚ã‚‹ã“ã¨ã‚’ç¢ºèªã—ã¦ã€æ’®å½±ãƒ»è§£æã‚’è¡Œã£ã¦ãã ã•ã„.\n");
 	fprintf(stderr, "-------------------------------------------------------------------------\n");
 }
-void D00(void)		//ƒL[‘€ìˆê——‚ÌƒeƒLƒXƒg•\¦
+void D00(void)		//ã‚­ãƒ¼æ“ä½œä¸€è¦§ã®ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤º
 {
 	fprintf(stderr, "--------------------------------------------------------------------------\n");
-	//fprintf(stderr, "¦CameraƒEƒBƒ“ƒhƒE‚ğƒAƒNƒeƒBƒu‚É‚·‚é‚±‚Æ‚ÅƒL[‘€ì‚ª‰Â”\\n\n");
-	fprintf(stderr, " d :ÀŒ±ƒtƒHƒ‹ƒ_‚Ìì¬.\n");
-	fprintf(stderr, " b :ƒeƒ“ƒvƒŒ[ƒg—p‰æ‘œ‚Ì•Û‘¶.\n");
-	fprintf(stderr, " s :‰æ‘œ‚ğ250–‡•Û‘¶\n");
+	//fprintf(stderr, "â€»Cameraã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã«ã™ã‚‹ã“ã¨ã§ã‚­ãƒ¼æ“ä½œãŒå¯èƒ½\n\n");
+	fprintf(stderr, " d :å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€ã®ä½œæˆ.\n");
+	fprintf(stderr, " b :ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”¨ç”»åƒã®ä¿å­˜.\n");
+	fprintf(stderr, " s :ç”»åƒã‚’250æšä¿å­˜\n");
 
-	fprintf(stderr, " t :–³§ŒÀ‚É‰æ‘œ‚ğ•Û‘¶(Spece Key‚Ì“ü—Í‚ÅI—¹)\n");
-	fprintf(stderr, " R :ƒeƒ“ƒvƒŒ[ƒg‚Ì—ûK\n");
+	fprintf(stderr, " t :ç„¡åˆ¶é™ã«ç”»åƒã‚’ä¿å­˜(Spece Keyã®å…¥åŠ›ã§çµ‚äº†)\n");
+	fprintf(stderr, " R :ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã®ç·´ç¿’\n");
 
-	fprintf(stderr, " m :Match Template@‚ÌÀs,”’lo—Í.\n");
-	fprintf(stderr, " q or Esc : ‚±‚ÌƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ğI—¹‚·‚é\n");
+	fprintf(stderr, " m :Match Templateã€€ã®å®Ÿè¡Œ,æ•°å€¤å‡ºåŠ›.\n");
+	fprintf(stderr, " q or Esc : ã“ã®ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚’çµ‚äº†ã™ã‚‹\n");
 	fprintf(stderr, "-------------------------------------------------------------------------\n\n");
-	fprintf(stderr, " ÀŒ±ƒtƒHƒ‹ƒ_‚ª‚ ‚é‚±‚Æ‚ğŠm”F‚µ‚ÄAB‰eE‰ğÍ‚ğs‚Á‚Ä‚­‚¾‚³‚¢.\n\n\n");
+	fprintf(stderr, " å®Ÿé¨“ãƒ•ã‚©ãƒ«ãƒ€ãŒã‚ã‚‹ã“ã¨ã‚’ç¢ºèªã—ã¦ã€æ’®å½±ãƒ»è§£æã‚’è¡Œã£ã¦ãã ã•ã„.\n\n\n");
 }
 
 
 
-/*‡”Ô’Ê‚è‚É“®‚©‚µ‚Ä‚à‚ç‚¤‚½‚ß‚ÌƒL[ƒ{[ƒhà–¾•\¦*/
-void D(int K)		//ƒL[‘€ìˆê——‚ÌƒeƒLƒXƒg•\¦
+/*é †ç•ªé€šã‚Šã«å‹•ã‹ã—ã¦ã‚‚ã‚‰ã†ãŸã‚ã®ã‚­ãƒ¼ãƒœãƒ¼ãƒ‰èª¬æ˜è¡¨ç¤º*/
+void D(int K)		//ã‚­ãƒ¼æ“ä½œä¸€è¦§ã®ãƒ†ã‚­ã‚¹ãƒˆè¡¨ç¤º
 {
 	fprintf(stderr, "--------------------------------------------------------------------------\n");
-	//fprintf(stderr, "¦CameraƒEƒBƒ“ƒhƒE‚ğƒAƒNƒeƒBƒu‚É‚·‚é‚±‚Æ‚ÅƒL[‘€ì‚ª‰Â”\\n\n");
+	//fprintf(stderr, "â€»Cameraã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’ã‚¢ã‚¯ãƒ†ã‚£ãƒ–ã«ã™ã‚‹ã“ã¨ã§ã‚­ãƒ¼æ“ä½œãŒå¯èƒ½\n\n");
 	if (K == 'd'||K=='D'){
-		fprintf(stderr, "‰ğÍˆ—‚Å•K—v‚Æ‚È‚éƒeƒ“ƒvƒŒ[ƒgŒ³‰æ‘œ‚Ìì¬\n");
-		fprintf(stderr, " b :ƒeƒ“ƒvƒŒ[ƒg—p‰æ‘œ‚Ì•Û‘¶.\n");
-		fprintf(stderr, " q or Esc : ‚±‚ÌƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ğI—¹‚·‚é\n");
+		fprintf(stderr, "è§£æå‡¦ç†ã§å¿…è¦ã¨ãªã‚‹ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆå…ƒç”»åƒã®ä½œæˆ\n");
+		fprintf(stderr, " b :ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆç”¨ç”»åƒã®ä¿å­˜.\n");
+		fprintf(stderr, " q or Esc : ã“ã®ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚’çµ‚äº†ã™ã‚‹\n");
 	}
 	else if(K == 'b'||K=='B'){
-		fprintf(stderr, "B‰e•Û‘¶•û–@\n");
-		fprintf(stderr, " s :‰æ‘œ‚ğ250–‡•Û‘¶\n");
-		fprintf(stderr, " q or Esc : ‚±‚ÌƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ğI—¹‚·‚é\n");
+		fprintf(stderr, "æ’®å½±ä¿å­˜æ–¹æ³•\n");
+		fprintf(stderr, " s :ç”»åƒã‚’250æšä¿å­˜\n");
+		fprintf(stderr, " q or Esc : ã“ã®ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚’çµ‚äº†ã™ã‚‹\n");
 	}
 	else if(K == 's' || K == 't'||K=='S' ){
-		fprintf(stderr, "B‰e‚ª¸”s‚µ‚½ê‡‚ÍÄB‰e‘€ì‚ğs‚Á‚Ä‚­‚¾‚³‚¢.\n");
-		fprintf(stderr, " s :‰æ‘œ‚ğ250–‡•Û‘¶\n");
+		fprintf(stderr, "æ’®å½±ãŒå¤±æ•—ã—ãŸå ´åˆã¯å†æ’®å½±æ“ä½œã‚’è¡Œã£ã¦ãã ã•ã„.\n");
+		fprintf(stderr, " s :ç”»åƒã‚’250æšä¿å­˜\n");
 
 
-		fprintf(stderr, " B‰e¬Œ÷‚µ‚½ê‡‚ÍŸ‚Ì“®ì‚ğs‚Á‚Ä‚­‚¾‚³‚¢.\n");
-		fprintf(stderr, " ‰ğÍˆ—AI—¹ˆ—\n");
-		fprintf(stderr, " m :Match Template@‚ÌÀs,”’lo—Í.\n");
-		fprintf(stderr, " q or Esc : ‚±‚ÌƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ğI—¹‚·‚é\n");
+		fprintf(stderr, " æ’®å½±æˆåŠŸã—ãŸå ´åˆã¯æ¬¡ã®å‹•ä½œã‚’è¡Œã£ã¦ãã ã•ã„.\n");
+		fprintf(stderr, " è§£æå‡¦ç†ã€çµ‚äº†å‡¦ç†\n");
+		fprintf(stderr, " m :Match Templateã€€ã®å®Ÿè¡Œ,æ•°å€¤å‡ºåŠ›.\n");
+		fprintf(stderr, " q or Esc : ã“ã®ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚’çµ‚äº†ã™ã‚‹\n");
 	}
 	else if(K == 'm'||K=='M'){
-		fprintf(stderr, " ‰ğÍˆ—‚ğÄÀsAI—¹ˆ—\n");
-		fprintf(stderr, " m :Match Template@‚ÌÀs,”’lo—Í.\n");
-		fprintf(stderr, " q or Esc : ‚±‚ÌƒAƒvƒŠƒP[ƒVƒ‡ƒ“‚ğI—¹‚·‚é\n");
+		fprintf(stderr, " è§£æå‡¦ç†ã‚’å†å®Ÿè¡Œã€çµ‚äº†å‡¦ç†\n");
+		fprintf(stderr, " m :Match Templateã€€ã®å®Ÿè¡Œ,æ•°å€¤å‡ºåŠ›.\n");
+		fprintf(stderr, " q or Esc : ã“ã®ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³ã‚’çµ‚äº†ã™ã‚‹\n");
 	}
 	else{ D0(); }
 	fprintf(stderr, "-------------------------------------------------------------------------\n");
