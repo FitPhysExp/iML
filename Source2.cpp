@@ -35,45 +35,42 @@
 const char* FolderName = "実験フォルダ";//フォルダ名
 errno_t error;
 using namespace std;
-double config_val;
-FILE *file_config;
 /*最初のキーボード説明表示*/
 void D0(void)		//キー操作一覧のテキスト表示
 {
-	fprintf(stderr, "--------------------------------------------------------------------------\n");
-	//fprintf(stderr, "※Cameraウィンドウをアクティブにすることでキー操作が可能\n\n");
-	fprintf(stderr, " 1 :テンプレート用画像の保存.\n");
-	fprintf(stderr, " 2 :テンプレート用画像の編集・トリミング.\n");
-	fprintf(stderr, " 3 :画像を250枚保存(Spece Keyの入力で終了).\n");
-	fprintf(stderr, " 4 :テンプレートマッチングの実行,結果データ出力.\n");
-	fprintf(stderr, 
+	fprintf(stderr,
+		"--------------------------------------------------------------------------\n"
+		" 1 :テンプレート用画像の保存.\n"
+		" 2 :テンプレート用画像の編集・トリミング.\n"
+		" 3 :画像を250枚保存(Spece Keyの入力で終了).\n"
+		" 4 :テンプレートマッチングの実行,結果データ出力.\n"
 		" 5 :結果データの解析.\n"
 		" 6 :データ保存.\n"
+		" 0 or q or Esc : このアプリケーションを終了する\n"
+		" 7 :マッチングの類似度を変更する\n"
+		" 8 :データコピーのためフォルダを開く\n"
+		" c :カメラを変更する\n"
+		" H :ヘルプ表示\n"
+		" 実験フォルダがあることを確認して、撮影・解析を行ってください.\n"
+		"-------------------------------------------------------------------------\n"
 		);
-
-	fprintf(stderr, " 0 or q or Esc : このアプリケーションを終了する\n");
-	fprintf(stderr, " 7 :マッチングの類似度を変更する\n");
-	fprintf(stderr, " 8 :データコピーのためフォルダを開く\n");
-	fprintf(stderr, " c :カメラを変更する\n");
-	fprintf(stderr, " H :ヘルプ表示\n");
-	fprintf(stderr, " 実験フォルダがあることを確認して、撮影・解析を行ってください.\n");
-	fprintf(stderr, "-------------------------------------------------------------------------\n");
 }
 void D00(void)		//キー操作一覧のテキスト表示
 {
-	fprintf(stderr, " d :実験フォルダの作成.\n");
-	fprintf(stderr, " t :画像を無制限にメモリに保存(Spece Keyの入力で終了)\n");
-	fprintf(stderr, " S :画像を250枚直接ハードディスクに保存\n");
-	fprintf(stderr, " T :画像を無制限に直接ハードディスクに保存\n");
-	fprintf(stderr, " 9 :処理画像を表示する\n");
-	fprintf(stderr, " V :撮影画像を表示する\n");
-	fprintf(stderr, " C :相互相関係数分布の表示\n");
-
-	fprintf(stderr, " R :テンプレートの練習\n");
-	fprintf(stderr, " M :テンプレートマッチ（バグ有）\n");
-	fprintf(stderr, " @ :様々な画像処理を行う(edge,rgb,color)\n");
-	fprintf(stderr, " q or Esc : このアプリケーションを終了する\n");
-	fprintf(stderr, "-------------------------------------------------------------------------\n\n");
+	fprintf(stderr,
+		" 0 or q or Esc : このアプリケーションを終了する\n"
+		" 9 :処理画像を表示する\n"
+		" C :相互相関係数分布の表示\n"
+		" d :実験フォルダの作成.\n"
+		" M :テンプレートマッチ（バグ有）\n"
+		" R :テンプレートの練習\n"
+		" S :画像を250枚直接ハードディスクに保存\n"
+		" t :画像を無制限にメモリに保存(Spece Keyの入力で終了)\n"
+		" T :画像を無制限に直接ハードディスクに保存\n"
+		" V :撮影画像を表示する\n"
+		" @ :様々な画像処理を行う(edge,rgb,color)\n"
+		"-------------------------------------------------------------------------\n\n"
+		);
 }
 void D(int K)
 {
@@ -245,15 +242,15 @@ void saveClock0(int i){
 int main(int argc, char **argv)
 {
 	int i, test, max = 0, M;
+	int Savecount = -1;//判断処理用変数
 	double min_val, max_val;
 	double Cmax, Cmin;
-	//double config_val;//Config.txt から読み込む類似度
+	double config_val;//Config.txt から読み込む類似度
 	CvPoint min_loc, max_loc;
 	CvPoint Pmin, Pmax;
 	CvSize dst_size;
 	IplImage *src_img, *dst_img;
 	IplImage *img_ccoeff;
-
 
 	//-------------------------------------------------------------------------------
 	char strB[_MAX_PATH] = "";
@@ -261,8 +258,6 @@ int main(int argc, char **argv)
 	char strT[_MAX_PATH] = "";
 	char strR[_MAX_PATH] = "";
 	//-------------------------------------------------------------------------------
-
-	int Savecount = -1;//判断処理用変数
 
 	//数値データファイル入出力
 	FILE *file, *file_config;
@@ -277,10 +272,8 @@ int main(int argc, char **argv)
 	//１台のみの場合cvCaptureFromCAMの引数はなんでもいい
 	//複数台の場合はPC起動時の接続順が引数になる
 
-
-	//------------------------------
 	D0();
-	if (_mkdir("実験フォルダ") == 0){													//.exeと同じ階層にディレクトリを作成
+	if (_mkdir("実験フォルダ") == 0){//.exeと同じ階層にディレクトリを作成
 		printf("フォルダ作成\n");
 	}
 	else{
@@ -289,8 +282,6 @@ int main(int argc, char **argv)
 	_mkdir("実験フォルダ\\数値データ");
 	_mkdir("実験フォルダ\\撮影画像");
 	_mkdir("実験フォルダ\\処理画像");
-	//_mkdir("実験フォルダ\\タイムスタンプ画像");
-
 
 	if (error = fopen_s(&file_config, "./実験フォルダ/Config.txt", "r") != 0){
 		fopen_s(&file_config, "./実験フォルダ/Config.txt", "w");
@@ -331,23 +322,10 @@ int main(int argc, char **argv)
 			printf("\n");
 		}
 
-
 		//ウィンドウ生成------------------------------------------------------------
 		cvNamedWindow("Camera", CV_WINDOW_AUTOSIZE);
 		IplImage *image1 = cvQueryFrame(videoCapture1);
 		cvShowImage("Camera", image1);
-		//IplImage *image2 = cvCreateImage(cvSize(image1->width, image1->height), IPL_DEPTH_32F, 1);
-		////IplImage *image2 = cvCreateImage(cvSize(640, 480), IPL_DEPTH_32F, 1);
-		//cvCanny(image1, image2, 50, 150);
-		//cvNamedWindow("Camera2", CV_WINDOW_AUTOSIZE);
-		//cvShowImage("Camera", image2);
-		//cvReleaseImage(&image1);
-		//--------------------------------------------------------------------------
-
-		//	cvNamedWindow("camera2", CV_WINDOW_AUTOSIZE);
-		//	IplImage * image2 = cvQueryFrame(videoCapture2);
-		//	cvShowImage("camera2", image2);
-
 
 		//実験基本動作ここから-----------------------------------------------------------------------------
 		//画像の1枚の保存を行う------------------------------------------------------------------------------
@@ -361,7 +339,7 @@ int main(int argc, char **argv)
 			fprintf(stderr, "テンプレート用画像の保存に成功しました\n");
 			D(key);
 		}
-		//ペイントで対象(テンプレート用画像)を開く------------------------------------------------------------
+		//ペイントで対象(テンプレート用画像)を開く-------------------------------------------
 		if (key == '2'){
 			system("mspaint \"実験フォルダ\\テンプレート.bmp");
 			D(key);
@@ -403,14 +381,12 @@ int main(int argc, char **argv)
 
 			fprintf(stderr, "撮影画像を保存しました.\n");
 			fprintClock();
-			//--------------------------------------------------------------------------
+
 			cvShowImage("Camera", image1);
 			D(key);
 		}
-		//--------------------------------------------------------------------------------------------------
-
+		//テンプレートマッチ-------------------------------------------------
 		if (key == '4'){
-			//マッチテンプレート
 			int num_bmp = 0;
 			int num_effected = 0;
 			IplImage *tmp_img;
@@ -420,15 +396,16 @@ int main(int argc, char **argv)
 				val4files[i1] = -0.01;
 			}
 
-			//cvDestroyAllWindows();
-			//--------------------------------------------------------------------------------------
+			//----------------------------------------------------------------------
 			printf("\n\n解析処理を行います.\n");
 			// precheck for 結果データ
 			sprintf_s(strR, "%s\\数値データ\\結果データ.csv", FolderName);
 			if (error = fopen_s(&file, strR, "w") != 0){
 				printf("%s\n", strR);
-				fprintf(stderr, "結果データに書き込めません.処理を中断します.\n");
-				fprintf(stderr, "（Excelなどで開いていると書き込めませんので閉じてください.）\n\n");
+				fprintf(stderr,
+					"結果データに書き込めません.処理を中断します.\n"
+					"（Excelなどで開いていると書き込めませんので閉じてください.）\n\n"
+					);
 				cvShowImage("Camera", image1);
 				D(key);
 				continue;
@@ -438,23 +415,26 @@ int main(int argc, char **argv)
 			//for csv
 			int myFILECOUNT = fscanClock();
 			if (myFILECOUNT == -1){
-				fprintf(stderr, "撮影画像データがありません.\n");
-				fprintf(stderr, "手順'3'を行ってください.\n\n");
+				fprintf(stderr,
+					"撮影画像データがありません.\n"
+					"手順'3'を行ってください.\n\n"
+					);
 				cvShowImage("Camera", image1);
 				D(key);
 				continue;
 			}
-			//--------------------------------------------------------------------------------------
 			printf("%d個のテンプレートマッチング処理を行います。少々お待ちください。\n", myFILECOUNT);
 
 			//読み込み
-			sprintf_s(strR, "%s\\テンプレート.bmp", FolderName);						//template picture as bmp format
+			sprintf_s(strR, "%s\\テンプレート.bmp", FolderName);//template picture as bmp format
 			tmp_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 
 			//読み込み失敗
 			if (tmp_img == NULL) {
-				fprintf(stderr, "テンプレート画像の読込みに失敗しました.\n");
-				fprintf(stderr, "手順'1'を行ってください.\n\n");
+				fprintf(stderr,
+					"テンプレート画像の読込みに失敗しました.\n"
+					"手順'1'を行ってください.\n\n"
+					);
 				cvShowImage("Camera", image1);
 				D(key);
 				continue;
@@ -462,8 +442,10 @@ int main(int argc, char **argv)
 
 			//read config.txt
 			if (error = fopen_s(&file_config, "./実験フォルダ/Config.txt", "r") != 0){
-				fprintf(stderr, "Config.txt の読込みに失敗しました.\n");
-				fprintf(stderr, "再起動(手順'0')してください.\n\n");
+				fprintf(stderr,
+					"Config.txt の読込みに失敗しました.\n"
+					"再起動(手順'0')してください.\n\n"
+					);
 				cvShowImage("Camera", image1);
 				D(key);
 				continue;
@@ -491,7 +473,7 @@ int main(int argc, char **argv)
 					// (1)探索画像全体に対して，テンプレートのマッチング値（指定した手法に依存）を計算
 					dst_size = cvSize(src_img->width - tmp_img->width + 1, src_img->height - tmp_img->height + 1);
 					dst_img = cvCreateImage(dst_size, IPL_DEPTH_32F, 1);
-					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);				//methodも変えつつ検証が必要
+					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);//methodも変えつつ検証が必要
 
 					cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
 
@@ -521,7 +503,7 @@ int main(int argc, char **argv)
 						cvWaitKey(1);
 					}
 					else{
-						// (2)テンプレートに対応する位置に矩形を描画、中心点も描画
+						// テンプレートに対応する位置に矩形を描画、中心点も描画
 						cvRectangle(src_img, max_loc, cvPoint(max_loc.x + tmp_img->width, max_loc.y + tmp_img->height), CV_RGB(0, 0, 255), 2);//青枠四角を描画
 						cvCircle(src_img, cvPoint(max_loc.x + tmp_img->width / 2, max_loc.y + tmp_img->height / 2), 1, CV_RGB(0, 255, 0), -1, 8);//中心描画
 						//タイムスタンプ
@@ -551,18 +533,24 @@ int main(int argc, char **argv)
 				cvReleaseImage(&src_img);
 			}
 			cvReleaseImage(&tmp_img);
-			//結果データの書き込み
+			fprintf(stderr,
+				"マッチング処理が終了しました。\n"
+				"結果データをCSVファイルに書き込みます。\n"
+				);
+
+			//テンプレートマッチの結果データの書き込み
 			sprintf_s(strR, "%s\\数値データ\\結果データ.csv", FolderName);
 			if (error = fopen_s(&file, strR, "w") != 0){
 				printf("%s\n", strT);
-				fprintf(stderr, "結果データに書き込めません.\n");
-				fprintf(stderr, "（Excelなどで開いていると書き込めません.）\n\n");
+				fprintf(stderr,
+					"結果データに書き込めません.\n"
+					"（Excelなどで開いていると書き込めません.）\n\n"
+					);
 				cvShowImage("Camera", image1);
 				D(key);
 				continue;
 			}
 
-			//----------------------------------------------------------------------------------------------
 			//結果CSV1行目の記述
 			fprintf(file, "画像ファイル名,t[s],x[pixel],y[pixel],X[meter],Y[meter],類似度,,←１ピクセルが何メートルか？\n");
 
@@ -584,16 +572,15 @@ int main(int argc, char **argv)
 							flagcsv = 1;
 						}
 						char FName[50];
-						//sprintf_s(FName, "img_%04d.bmp,%s", i, sprintClock(i));
 						sprintf_s(FName, "img_%04d.bmp", i);
 						fprintf(file, FName);	//ファイル名&時刻データを出力
 						elatime = strtod(sprintClock(i), &ale);
 						elatime -= elatime0;
-						fprintf(file, ",%.6lf", elatime);		//１フレームごとの時間座標を数値データ出力
-						fprintf(file, XYpoint[i]);		//XY座標を数値データ出力
-						fprintf(file, ",=(C%d-$C$2)*$H$1,=(D%d-$D$2)*$H$1", c, c);		//xとyを数値データ出力
+						fprintf(file, ",%.6lf", elatime);	//１フレームごとの時間座標を数値データ出力
+						fprintf(file, XYpoint[i]);	//XY座標を数値データ出力
+						fprintf(file, ",=(C%d-$C$2)*$H$1,=(D%d-$D$2)*$H$1", c, c);	//xとyを数値データ出力
 						fprintf(file, ",%.6lf", val4files[i]);
-						fprintf(file, "\n");			//改行しないと横1列になる
+						fprintf(file, "\n");	//改行しないと横1列になる
 						c++;
 					}
 				}
@@ -601,9 +588,6 @@ int main(int argc, char **argv)
 			fclose(file);
 
 			printf("数値データ出力が終了しました.\n");
-
-			//----------------------------------------------------------------------------------------------
-			fprintf(stderr, "マッチング処理が終了しました。\n");
 
 			printf("\n\n類似度%.1f%%以上の検出結果\n全%d枚中 %d枚検出できました.\n\n", config_val*100.0, num_bmp, num_effected);
 			printf("---------検出数が少ない場合の対処---------\n");
@@ -624,11 +608,8 @@ int main(int argc, char **argv)
 
 
 
-
-
-
 		//実験補助動作ここから-----------------------------------------------------------------------------
-		//---------------------------------------------------------------------------------------------------------------
+		//カメラ切り替え----------------------------------
 		if (key == 'c'){
 			defaultCAM--;
 			if (defaultCAM < 0){ defaultCAM = 3; }
@@ -637,6 +618,7 @@ int main(int argc, char **argv)
 			videoCapture1 = cvCaptureFromCAM(defaultCAM);
 			D(key);
 		}
+		//類似度変更----------------------------------
 		if (key == '7'){
 			char aa[10];
 			int numa = 0;
@@ -656,8 +638,7 @@ int main(int argc, char **argv)
 					else
 					{
 						double cva = config_val;
-						fprintf_s(file_config, "%lf", cva);
-						// Set pointer to beginning of file:  
+						fprintf_s(file_config, "%lf", cva);// Set pointer to beginning of file:  
 						fseek(file_config, 0L, SEEK_SET);
 						fscanf_s(file_config, "%lf", &config_val);
 						fclose(file_config);
@@ -671,35 +652,31 @@ int main(int argc, char **argv)
 			D(key);
 		}
 		if (key == '8'){
-			system("explorer \"実験フォルダ");					//エクスプローラーで対象を開く
+			system("explorer \"実験フォルダ");//エクスプローラーで対象を開く
 			D(key);
 		}
-
 		//相互相関係数分布
 		if (key == 'C'){
 			cvConvertScale(img_ccoeff, img_ccoeff, 1.0 / Cmax, 0.0);
 			cvShowImage("相互相関係数分布", img_ccoeff);
 		}
-		//ディレクトリ作成---------------------------------------------------------------------------------------------------------
-		/*Dキー*/if (key == 'd' || key == 'D'){ //C:\\Users\\yama\\Documents\\実験フォルダ-webCam
-			if (_mkdir("実験フォルダ") == 0){													//.exeと同じ階層にディレクトリを作成
+		//ディレクトリ作成-----------------------------------
+		if (key == 'd' || key == 'D'){ //C:\\Users\\yama\\Documents\\実験フォルダ-webCam
+			if (_mkdir("実験フォルダ") == 0){//.exeと同じ階層にディレクトリを作成
 				printf("フォルダ作成\n");
 			}
 			else{
 				printf("フォルダ作成に失敗しました。既にフォルダが存在する可能性があります。\n");
 			}
-			system("explorer \"実験フォルダ");												//エクスプローラーで対象を開く
+			system("explorer \"実験フォルダ");//エクスプローラーで対象を開く
 			_mkdir("実験フォルダ\\数値データ");
 			_mkdir("実験フォルダ\\撮影画像");
 			_mkdir("実験フォルダ\\処理画像");
-			//_mkdir("実験フォルダ\\タイムスタンプ画像");
 
 			fprintf(stderr, "実験用フォルダ作成を開きます.\n");
 			D(key);
-
 		}
-
-		//設定枚数分の画像をメモリ使用し無限に保存する------------------------------------------------------------------------
+		//設定枚数分の画像をメモリ使用し無限に保存する---------------
 		if (key == 't'){
 			fprintf(stderr, "画像メモリ格納開始.(Space key で終了).\n");
 			cvDestroyAllWindows();
@@ -739,42 +716,32 @@ int main(int argc, char **argv)
 
 			fprintf(stderr, "撮影画像を保存しました.\n");
 			fprintClock();
-			//--------------------------------------------------------------------------
 			cvShowImage("Camera", image1);
 			D(key);
 		}
-		//--------------------------------------------------------------------------------------------------
-
-
-
 		//設定枚数分の画像を直接HDに保存する------------------------------------------------------------------------
-		/*Sキー*/if (key == 'S'){
+		if (key == 'S'){
 			fprintf(stderr, "画像保存開始.\n");
 			cvDestroyAllWindows();
 			startClock();
 			for (int i = 0; i < FILECOUNT; i++){
 				cap >> frame;
-
 				IplImage *output = cvQueryFrame(videoCapture1);
+
 				sprintf_s(strS, "%s\\撮影画像\\outputpic_%04d.bmp", FolderName, i);
 				saveClock(i);
 				cvSaveImage(strS, output);
 
 				printf("outputpic_%04d.bmp 保存\n", i);
 			}
-
 			fprintf(stderr, "撮影画像を保存しました.\n");
 			fprintClock();
 
 			cvShowImage("Camera", image1);
 			D(key);
 		}
-		//--------------------------------------------------------------------------------------------------
-
-
 		//無制限に保存する--------------------HDD領域が許す限り記録できるはず
-		/*Tキー*/if (key == 'T'){
-
+		if (key == 'T'){
 			//保存中Cameraウィンドウが応答中になるのでウィンドウを消しておく
 			cvDestroyAllWindows();
 
@@ -804,10 +771,8 @@ int main(int argc, char **argv)
 			fprintf(stderr, "画像の保存に成功しました!\n");
 			D(key);
 		}
-
-		//----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-		if (key == 'M'){//マッチテンプレート old version(メモリリークあり！！！）
+		//マッチテンプレート old version(メモリリークあり！！！）
+		if (key == 'M'){
 			int num_bmp = 0;
 			int num_effected = 0;
 			IplImage *tmp_img;
@@ -819,14 +784,14 @@ int main(int argc, char **argv)
 			}
 
 			cvDestroyAllWindows();
-			//--------------------------------------------------------------------------------------
-			printf("\n\n解析処理を行います.\n");
-			// precheck for 結果データ
+			printf("\n\n解析処理を行います.\n");// precheck for 結果データ
 			sprintf_s(strR, "%s\\数値データ\\結果データ.csv", FolderName);
 			if (error = fopen_s(&file, strR, "w") != 0){
 				printf("%s\n", strR);
-				fprintf(stderr, "結果データに書き込めません.処理を中断します.\n");
-				fprintf(stderr, "（Excelなどで開いていると書き込めませんので閉じてください.）\n\n");
+				fprintf(stderr, 
+					"結果データに書き込めません.処理を中断します.\n"
+					"（Excelなどで開いていると書き込めませんので閉じてください.）\n\n"
+					);
 				cvShowImage("Camera", image1);
 				D(key);
 				continue;
@@ -835,23 +800,26 @@ int main(int argc, char **argv)
 
 			//for csv
 			if (fscanClock() == -1){
-				fprintf(stderr, "撮影データがありません.\n");
-				fprintf(stderr, "撮影を行ってください.\n\n");
+				fprintf(stderr, 
+					"撮影データがありません.\n"
+					"撮影を行ってください.\n\n"
+					);
 				cvShowImage("Camera", image1);
 				D(key);
 				continue;
 			}
-			//--------------------------------------------------------------------------------------
 			printf("テンプレートマッチング処理を行います。少々お待ちください。\n");
 
 			//読み込み
-			sprintf_s(strR, "%s\\テンプレート.bmp", FolderName);						//template picture as bmp format
+			sprintf_s(strR, "%s\\テンプレート.bmp", FolderName);//template picture as bmp format
 			tmp_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 
 			//読み込み失敗
 			if (tmp_img == NULL) {
-				fprintf(stderr, "テンプレート画像の読込みに失敗しました.\n");
-				fprintf(stderr, "テンプレート画像を作成してください.\n\n");
+				fprintf(stderr, 
+					"テンプレート画像の読込みに失敗しました.\n"
+					"テンプレート画像を作成してください.\n\n"
+					);
 				cvShowImage("Camera", image1);
 				D(key);
 				continue;
@@ -859,8 +827,10 @@ int main(int argc, char **argv)
 
 			//read config.txt
 			if (error = fopen_s(&file_config, "./実験フォルダ/Config.txt", "r") != 0){
-				fprintf(stderr, "Config.txt の読込みに失敗しました.\n");
-				fprintf(stderr, "再起動してください.\n\n");
+				fprintf(stderr, 
+					"Config.txt の読込みに失敗しました.\n"
+					"再起動してください.\n\n"
+					);
 				cvShowImage("Camera", image1);
 				D(key);
 				continue;
@@ -877,8 +847,10 @@ int main(int argc, char **argv)
 
 				//読み込み失敗
 				if (src_img == NULL) {
-					fprintf(stderr, "撮影画像の読込みに失敗しました.\n");
-					fprintf(stderr, "撮影画像をやり直してください.\n\n");
+					fprintf(stderr, 
+						"撮影画像の読込みに失敗しました.\n"
+						"撮影画像をやり直してください.\n\n"
+						);
 					cvShowImage("Camera", image1);
 					D(key);
 					continue;
@@ -889,15 +861,14 @@ int main(int argc, char **argv)
 					// (1)探索画像全体に対して，テンプレートのマッチング値（指定した手法に依存）を計算
 					dst_size = cvSize(src_img->width - tmp_img->width + 1, src_img->height - tmp_img->height + 1);
 					dst_img = cvCreateImage(dst_size, IPL_DEPTH_32F, 1);
-					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);				//methodも変えつつ検証が必要
+					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);//methodも変えつつ検証が必要
 
 					cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
 
-					/*150番目の類似度確認用*/
+					//150番目の類似度確認用
 					if (i == 150){
 						img_ccoeff = dst_img;
 						cvMinMaxLoc(img_ccoeff, &Cmin, &Cmax, &Pmin, &Pmax, NULL);
-
 					}
 					cvReleaseImage(&dst_img);
 					max_val = max_val;
@@ -908,7 +879,7 @@ int main(int argc, char **argv)
 						printf("類似度%.1f(%.1f%%未満)\n", max_val*100.0, config_val*100.0);
 					}
 					else{
-						// (2)テンプレートに対応する位置に矩形を描画、中心点も描画
+						//テンプレートに対応する位置に矩形を描画、中心点も描画
 						cvRectangle(src_img, max_loc, cvPoint(max_loc.x + tmp_img->width, max_loc.y + tmp_img->height), CV_RGB(255, 0, 0), 2);//四角を描画
 						cvCircle(src_img, cvPoint(max_loc.x + tmp_img->width / 2, max_loc.y + tmp_img->height / 2), 1, CV_RGB(0, 255, 0), -1, 8);//中心描画
 						//タイムスタンプ
@@ -928,32 +899,35 @@ int main(int argc, char **argv)
 						//X,Y座標の出力 - for csv
 						sprintf_s(XYpoint[i], ",%02d,%02d", (max_loc.x + tmp_img->width / 2), (max_loc.y + tmp_img->height / 2));
 						printf("Effected_%04d.bmp 作成 (類似度%.1f%%)\n", i, max_val*100.0);
-
 					}
 				}
-
 			}
 			cvReleaseImage(&tmp_img);
+
+			fprintf(stderr,
+				"マッチング処理が終了しました。\n"
+				"結果データをCSVファイルに書き込みます。\n"
+				);
 
 			//結果データの書き込み
 			sprintf_s(strR, "%s\\数値データ\\結果データ.csv", FolderName);
 			if (error = fopen_s(&file, strR, "w") != 0){
 				printf("%s\n", strT);
-				fprintf(stderr, "結果データに書き込めません.\n");
-				fprintf(stderr, "（Excelなどで開いていると書き込めません.）\n\n");
+				fprintf(stderr, 
+					"結果データに書き込めません.\n"
+					"（Excelなどで開いていると書き込めません.）\n\n"
+					);
 				cvShowImage("Camera", image1);
 				D(key);
 				continue;
 			}
 
-
 			if (num_effected != 0){
-				//----------------------------------------------------------------------------------------------
 				//結果CSV1行目の記述
 				fprintf(file, "画像ファイル名,t[s],x[pixel],y[pixel],X[meter],Y[meter],類似度,,←１ピクセルが何メートルか？\n");
 
 				//各行の記述
-				int c = 2; // line number of csv file (start from 2)
+				int c = 2; //line number of csv file (start from 2)
 				int flagcsv = 0;
 				double elatime, elatime0;
 				char *ale;
@@ -969,25 +943,19 @@ int main(int argc, char **argv)
 							flagcsv = 1;
 						}
 						char FName[50];
-						//sprintf_s(FName, "img_%04d.bmp,%s", i, sprintClock(i));
 						sprintf_s(FName, "img_%04d.bmp", i);
 						fprintf(file, FName);	//ファイル名&時刻データを出力
 						elatime = strtod(sprintClock(i), &ale);
 						elatime -= elatime0;
 						fprintf(file, ",%.6lf", elatime);		//１フレームごとの時間座標を数値データ出力
 						fprintf(file, XYpoint[i]);		//XY座標を数値データ出力
-						fprintf(file, ",=(C%d-$C$2)*$H$1,=(D%d-$D$2)*$H$1", c, c);		//xとyを数値データ出力
+						fprintf(file, ",=(C%d-$C$2)*$H$1,=(D%d-$D$2)*$H$1", c, c);	//xとyを数値データ出力
 						fprintf(file, ",%.6lf", val4files[i]);
 						fprintf(file, "\n");			//改行しないと横1列になる
 						c++;
 					}
 				}
-
 				printf("数値データ出力が終了しました.\n");
-
-
-				//----------------------------------------------------------------------------------------------
-				fprintf(stderr, "マッチング処理が終了しました。\n");
 
 				printf("\n\n類似度%.1f%%以上の検出結果\n全%d枚中 %d枚検出できました.\n\n", config_val*100.0, num_bmp, num_effected);
 				printf("---------検出数が少ない場合の対処---------\n");
@@ -1006,8 +974,10 @@ int main(int argc, char **argv)
 			sprintf_s(strR, "%s\\テンプレート.bmp", FolderName);						//template picture as bmp format
 			tmp_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 			if (tmp_img == NULL) {//読み込み失敗
-				fprintf(stderr, "テンプレート画像の読込みに失敗しました.\n");
-				fprintf(stderr, "テンプレート画像を作成してください.\n\n");
+				fprintf(stderr, 
+					"テンプレート画像の読込みに失敗しました.\n"
+					"テンプレート画像を作成してください.\n\n"
+					);
 				cvShowImage("Camera", image1);
 				D(key);
 				continue;
@@ -1017,8 +987,10 @@ int main(int argc, char **argv)
 
 			//read config.txt
 			if (error = fopen_s(&file_config, "./実験フォルダ/Config.txt", "r") != 0){
-				fprintf(stderr, "Config.txt の読込みに失敗しました.\n");
-				fprintf(stderr, "再起動してください.\n\n");
+				fprintf(stderr, 
+					"Config.txt の読込みに失敗しました.\n"
+					"再起動してください.\n\n"
+					);
 				cvShowImage("Camera", image1);
 				D(key);
 				continue;
@@ -1027,7 +999,6 @@ int main(int argc, char **argv)
 				fscanf_s(file_config, "%lf", &config_val);
 				fclose(file_config);
 			}
-
 			//無限ループ処理
 			startClock();
 			int i = 0;
@@ -1061,10 +1032,10 @@ int main(int argc, char **argv)
 				dst_size = cvSize(src_img->width - tmp_img->width + 1, src_img->height - tmp_img->height + 1);
 				dst_img = cvCreateImage(dst_size, IPL_DEPTH_32F, 1);
 				if (q_const){
-					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);				//定常追跡
+					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);	//定常追跡
 				}
 				else{
-					cvMatchTemplate(src_img, tmp_img2, dst_img, CV_TM_CCOEFF_NORMED);				//動的追跡
+					cvMatchTemplate(src_img, tmp_img2, dst_img, CV_TM_CCOEFF_NORMED);	//動的追跡
 				}
 				cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
 				cvReleaseImage(&dst_img);
@@ -1104,19 +1075,18 @@ int main(int argc, char **argv)
 			cvShowImage("Camera", image1);
 			D(key);
 		}
-		//--------------------------------------------------------------------------------------------------
-
 
 		//Exit-----------------------------------
 		if (key == '0' || key == 27 || key == 'q' || key == 'Q'){
 			break;
 		}
+		//Help-----------------------------------
 		if (key == '?' || key == 'h' || key == 'H'){
 			D0();
 			D00();
 		}
-		/*vキー*/if (key == 'V' || key == '9'){
-			//--------------------------------------------------------------------------------------
+		if (key == 'V' || key == '9'){
+			//---------------------------------------
 			//for csv
 			int myFILECOUNT = fscanClock();
 			if (myFILECOUNT == -1){
@@ -1186,11 +1156,12 @@ int main(int argc, char **argv)
 			}
 			int flagM = 0;
 
-			//エッジ検出------------------------------------------------------------------------------
-
 			if (!strcmp(app, "N")){
+				flagM = 0;
 				D(key);
+				continue;
 			}
+			//エッジ検出-----------------------------------------
 			else if (!strcmp(app, "edge")){
 				IplImage *imgT_in, *imgT_out, *img_in, *img_out;
 				_mkdir("実験フォルダ\\エッジ撮影画像");
@@ -1246,17 +1217,16 @@ int main(int argc, char **argv)
 				sprintf_s(strRout, "%s\\エッジ撮影画像\\outputpic_", FolderName);
 				sprintf_s(strReff, "%s\\エッジ処理画像\\Effected_", FolderName);
 				flagM = 1;
-
 			}
 
-			//RGB分離後にエッジ検出-----------------------------------------------------------------------------
+			//RGB分離後にエッジ検出---------------------------------------
 			else if (!strcmp(app, "rgb")){
 				IplImage *imgT_in, *imgT_out, *imgET_out, *img_in, *img_out, *imgE_out;
 				_mkdir("実験フォルダ\\RGB撮影画像");
 				_mkdir("実験フォルダ\\RGBエッジ撮影画像");
 				_mkdir("実験フォルダ\\RGBエッジ処理画像");
 
-				int  r_ave, g_ave, b_ave, e_temp;
+				int e_temp;
 				CvScalar ave;
 				IplImage *img_r, *img_g, *img_b, *img_R, *img_G, *img_B;
 
@@ -1297,9 +1267,6 @@ int main(int argc, char **argv)
 				cvMerge(img_B, NULL, NULL, NULL, img_b);
 
 				ave = cvAvg(imgT_in);
-				r_ave = (int)ave.val[2];
-				g_ave = (int)ave.val[1];
-				b_ave = (int)ave.val[0];
 
 				if ((ave.val[2] > ave.val[1]) && (ave.val[2] > ave.val[0]))e_temp = 2;
 				else if ((ave.val[1] > ave.val[2]) && (ave.val[1] > ave.val[0]))e_temp = 1;
@@ -1360,7 +1327,6 @@ int main(int argc, char **argv)
 					else if (e_temp == 1)img_out = img_g;
 					else img_out = img_b;
 
-
 					sprintf_s(strS, "%s\\RGB撮影画像\\outputpic_%04d.bmp", FolderName, i);
 					cvSaveImage(strS, img_out);
 
@@ -1379,16 +1345,13 @@ int main(int argc, char **argv)
 				}
 				printf("%s\nRGB分離後のエッジ加工が終わりました\n", strS);
 
-
 				sprintf_s(strRcsv, "%s\\数値データ\\RGB結果データ.csv", FolderName);
 				sprintf_s(strRT, "%s\\テンプレートRGBE.bmp", FolderName);
 				sprintf_s(strRout, "%s\\RGBエッジ撮影画像\\outputpic_", FolderName);
 				sprintf_s(strReff, "%s\\RGBエッジ処理画像\\Effected_", FolderName);
 				flagM = 1;
-
-
 			}
-			//色検出-----------------------------------------------------------------------------
+			//色検出-------------------------------------------
 			else if (!strcmp(app, "color")){
 				_mkdir("実験フォルダ\\色検出撮影画像");
 				_mkdir("実験フォルダ\\色検出処理画像");
@@ -1401,7 +1364,7 @@ int main(int argc, char **argv)
 					continue;
 				}
 
-				sprintf_s(strR, "%s\\テンプレート.bmp", FolderName);	//画像選択
+				sprintf_s(strR, "%s\\テンプレート.bmp", FolderName);//画像選択
 				cv::Mat input_imgT = cv::imread(strR, 1);
 				if (input_imgT.empty()){
 					printf("not file\n");
@@ -1446,9 +1409,9 @@ int main(int argc, char **argv)
 				s_ave = s_ave / winhei;
 				v_ave = v_ave / winhei;
 				/*
-								printf("H = %3d\n", h_ave);
-								printf("S = %3d\n", s_ave);
-								printf("V = %3d\n", v_ave);*/
+				printf("H = %3d\n", h_ave);
+				printf("S = %3d\n", s_ave);
+				printf("V = %3d\n", v_ave);*/
 
 				int h_ave1 = 0, s_ave1 = 0, v_ave1 = 0;
 				int h_ave2 = 0, s_ave2 = 0, v_ave2 = 0;
@@ -1563,7 +1526,7 @@ int main(int argc, char **argv)
 				continue;
 			}
 
-			if (flagM = 1){
+			if (flagM != 0){
 				//マッチテンプレート
 				int num_bmp = 0;
 				int num_effected = 0;
@@ -1574,7 +1537,6 @@ int main(int argc, char **argv)
 					val4files[i1] = -0.01;
 				}
 
-				//--------------------------------------------------------------------------------------
 				printf("\n\n解析処理を行います.\n");
 				// precheck for 結果データ
 				if (error = fopen_s(&file, strRcsv, "w") != 0){
@@ -1631,8 +1593,7 @@ int main(int argc, char **argv)
 						// (1)探索画像全体に対して，テンプレートのマッチング値（指定した手法に依存）を計算
 						dst_size = cvSize(src_img->width - tmp_img->width + 1, src_img->height - tmp_img->height + 1);
 						dst_img = cvCreateImage(dst_size, IPL_DEPTH_32F, 1);
-						cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);				//methodも変えつつ検証が必要
-
+						cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);//methodも変えつつ検証が必要
 						cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
 
 						/*150番目の類似度確認用*/
@@ -1687,6 +1648,10 @@ int main(int argc, char **argv)
 					cvReleaseImage(&src_img);
 				}
 				cvReleaseImage(&tmp_img);
+				fprintf(stderr,
+					"マッチング処理が終了しました。\n"
+					"結果データをCSVファイルに書き込みます。\n"
+					);
 				//結果データの書き込み
 				if (error = fopen_s(&file, strRcsv, "w") != 0){
 					printf("%s\n", strT);
@@ -1697,7 +1662,6 @@ int main(int argc, char **argv)
 					continue;
 				}
 
-				//----------------------------------------------------------------------------------------------
 				//結果CSV1行目の記述
 				fprintf(file, "画像ファイル名,t[s],x[pixel],y[pixel],X[meter],Y[meter],類似度,,←１ピクセルが何メートルか？\n");
 
@@ -1723,21 +1687,17 @@ int main(int argc, char **argv)
 							fprintf(file, FName);	//ファイル名&時刻データを出力
 							elatime = strtod(sprintClock(i), &ale);
 							elatime -= elatime0;
-							fprintf(file, ",%.6lf", elatime);		//１フレームごとの時間座標を数値データ出力
-							fprintf(file, XYpoint[i]);		//XY座標を数値データ出力
-							fprintf(file, ",=(C%d-$C$2)*$H$1,=(D%d-$D$2)*$H$1", c, c);		//xとyを数値データ出力
+							fprintf(file, ",%.6lf", elatime);	//１フレームごとの時間座標を数値データ出力
+							fprintf(file, XYpoint[i]);	//XY座標を数値データ出力
+							fprintf(file, ",=(C%d-$C$2)*$H$1,=(D%d-$D$2)*$H$1", c, c);	//xとyを数値データ出力
 							fprintf(file, ",%.6lf", val4files[i]);
-							fprintf(file, "\n");			//改行しないと横1列になる
+							fprintf(file, "\n");		//改行しないと横1列になる
 							c++;
 						}
 					}
 				}
 				fclose(file);
-
 				printf("数値データ出力が終了しました.\n");
-
-				//----------------------------------------------------------------------------------------------
-				fprintf(stderr, "マッチング処理が終了しました。\n");
 
 				printf("\n\n類似度%.1f%%以上の検出結果\n全%d枚中 %d枚検出できました.\n\n", config_val*100.0, num_bmp, num_effected);
 				printf("---------検出数が少ない場合の対処---------\n");
@@ -1749,12 +1709,9 @@ int main(int argc, char **argv)
 		}
 		//実験応用動作ここまで-----------------------------------------------------------------------------
 	}
-
 	cvReleaseCapture(&videoCapture1);
 	cvDestroyWindow("Camera");
-
 	return 0;
-
 }
 
 
@@ -1800,6 +1757,5 @@ loss of use, data, or profits; or business interruption) however caused
 and on any theory of liability, whether in contract, strict liability,
 or tort (including negligence or otherwise) arising in any way out of
 the use of this software, even if advised of the possibility of such damage.
-
 
 */
