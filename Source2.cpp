@@ -29,7 +29,7 @@
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib,"user32.lib")
 
-#define COUNT 500 // 特徴点の個数
+#define COUNT 1000 // 特徴点の個数
 #define FILECOUNT		250
 #define FILECOUNT_MAX   9999
 //100枚で3秒程度	(30fps)	//これを小さくし過ぎるとプログラムで使用する配列のサイズが変わる
@@ -1535,6 +1535,7 @@ int main(int argc, char **argv)
 				CvCapture* src;								// ビデオキャプチャ宣言
 				IplImage *frame_in, *frame_now, *frame_pre, *img_out;	// 画像リソース宣言
 				IplImage *img_tmp1, *img_tmp2, *pyramid_now, *pyramid_pre;
+				double th, h, S = 255, V = 255, r, g, b, max, min;
 
 				// 反復アルゴリズム用終了条件
 				CvTermCriteria criteria;
@@ -1592,10 +1593,53 @@ int main(int argc, char **argv)
 						feature_pre, feature_now, count, cvSize(10, 10),
 						4, status, NULL, criteria, 0);
 
+					float line_x = 0.0, line_y = 0.0;
 					cvSetZero(img_out);				// 結果画像初期化
 					for (i = 0; i < count; i++){		// オプティカルフロー描画
+						line_x = feature_pre[i].x - feature_now[i].x;
+						line_y = feature_pre[i].y - feature_now[i].y;
+
+						th = atan2(line_y, line_x) / 2;
+						h = (th * 180.0 / M_PI);
+						max = V; min = max - ((S / 255) * max);
+						if (h < 0){
+							h += 180;
+						}
+						h = h * 2;
+
+						if (h > 0 && h <= 60){
+							r = max;
+							g = (h / 60.0) * (max - min) + min;
+							b = min;
+						}
+						else if (h > 60 && h <= 120){
+							r = ((120.0 - h) / 60.0) * (max - min) + min;
+							g = max;
+							b = min;
+						}
+						else if (h > 120 && h <= 180){
+							r = min;
+							g = max;
+							b = ((h - 120.0) / 60.0) * (max - min) + min;
+						}
+						else if (h > 180 && h <= 240){
+							r = min;
+							g = ((240.0 - h) / 60.0) * (max - min) + min;
+							b = max;
+						}
+						else if (h > 240 && h <= 300){
+							r = ((h - 240.0) / 60.0) * (max - min) + min;
+							g = min;
+							b = max;
+						}
+						else if (h > 300 && h <= 360){
+							r = max;
+							g = min;
+							b = ((360.0 - h) / 60.0) * (max - min) + min;
+						}
+
 						cvLine(img_out, cvPointFrom32f(feature_pre[i]),
-							cvPointFrom32f(feature_now[i]), CV_RGB(255, 255, 255), 1, CV_AA, 0);
+							cvPointFrom32f(feature_now[i]), CV_RGB(b, g, r), 1, CV_AA, 0);
 					}
 
 					cvFlip(frame_in, frame_in, 1);
