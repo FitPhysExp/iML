@@ -1,5 +1,7 @@
-﻿// Source2.0 version 2017-08-30
+﻿// Source2.0 version 2017-09-04
 #include <stdio.h>
+#include <assert.h>
+#include <tchar.h>
 #include <vector>
 #include <iostream>
 #include <opencv2/opencv.hpp>
@@ -16,15 +18,18 @@
 #pragma comment (lib,    "opencv_core249d.lib")
 #pragma comment (lib, "opencv_imgproc249d.lib")
 #pragma comment (lib, "opencv_highgui249d.lib")
+#pragma comment (lib, "opencv_video249d.lib")
 #else
 #pragma comment (lib,    "opencv_core249.lib")
 #pragma comment (lib, "opencv_imgproc249.lib")
 #pragma comment (lib, "opencv_highgui249.lib")
+#pragma comment (lib, "opencv_video249.lib")
 #endif
 
 #pragma comment(lib, "shlwapi.lib")
 #pragma comment(lib,"user32.lib")
 
+#define COUNT 500 // 特徴点の個数
 #define FILECOUNT		250
 #define FILECOUNT_MAX   9999
 //100枚で3秒程度	(30fps)	//これを小さくし過ぎるとプログラムで使用する配列のサイズが変わる
@@ -1520,6 +1525,132 @@ int main(int argc, char **argv)
 				sprintf_s(strReff, "%s\\色検出処理画像\\Effected_", FolderName);
 				flagM = 1;
 			}
+			else if (!strcmp(app, "op")){
+				printf("\nオプティカルフロー、モーション履歴を出力します\nSpace keyで終了します\n");
+				//オプティカルフロー
+				int i, count = COUNT;
+				char status[COUNT];
+				CvPoint2D32f feature_pre[COUNT];	// 浮動小数点数型座標の特徴点
+				CvPoint2D32f feature_now[COUNT];
+				CvCapture* src;								// ビデオキャプチャ宣言
+				IplImage *frame_in, *frame_now, *frame_pre, *img_out;	// 画像リソース宣言
+				IplImage *img_tmp1, *img_tmp2, *pyramid_now, *pyramid_pre;
+
+				// 反復アルゴリズム用終了条件
+				CvTermCriteria criteria;
+				criteria = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
+
+				src = cvCaptureFromCAM(0); // 映像取得（カメラ映像）
+				if (src == NULL){ printf("映像が取得できません。\n"); cvWaitKey(0); return -1; }
+
+				frame_in = cvQueryFrame(src); // 初期フレーム取得
+				frame_now = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 1); // 画像リソース確保
+				frame_pre = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 1);
+				img_out = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 3);
+				img_tmp1 = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_32F, 1);
+				img_tmp2 = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_32F, 1);
+				pyramid_pre = cvCreateImage(cvSize(frame_in->width + 8, frame_in->height / 3),
+					IPL_DEPTH_8U, 1);
+				pyramid_now = cvCreateImage(cvSize(frame_in->width + 8, frame_in->height / 3),
+					IPL_DEPTH_8U, 1);
+				frame_in = cvQueryFrame(src);					// 現在フレーム取得
+				cvCvtColor(frame_in, frame_pre, CV_BGR2GRAY);	// グレースケール変換（事前画像準備）
+
+				//モーション履歴
+				double time_s, angle;
+				CvSize size;
+				IplImage *frame, *frame_now_m, *frame_pre_m, *diff;	// 画像変数宣言
+				IplImage *hist, *hist_8, *hist_32, *direction;
+
+
+				frame = cvQueryFrame(src);	// 初期フレーム取得
+
+				size = cvSize(frame->width, frame->height);	// 入力サイズ取得
+				// 画像領域確保・初期化
+				frame_pre_m = cvCreateImage(size, IPL_DEPTH_8U, 1); cvZero(frame_pre_m);
+				frame_now_m = cvCreateImage(size, IPL_DEPTH_8U, 1); cvZero(frame_now_m);
+				diff = cvCreateImage(size, IPL_DEPTH_8U, 1);	// 差分画像
+				hist = cvCreateImage(size, IPL_DEPTH_8U, 3);	// 履歴画像（整数型3チャネル）
+				hist_8 = cvCreateImage(size, IPL_DEPTH_8U, 1);	// 履歴画像（整数型1チャネル）
+				hist_32 = cvCreateImage(size, IPL_DEPTH_32F, 1);	// 履歴画像（浮動小数点数型1チャネル）
+				direction = cvCreateImage(size, IPL_DEPTH_32F, 1);	// 方向画像
+
+				cvNamedWindow("入力映像");
+				cvNamedWindow("オプティカルフロー");
+				cvNamedWindow("モーションテンプレート");
+
+				while (1){
+					//オプティカルフロー
+					frame_in = cvQueryFrame(src); if (frame_in == NULL) break;	// 現在フレーム取得
+
+					cvCvtColor(frame_in, frame_now, CV_BGR2GRAY);				// グレースケール変換
+
+					cvGoodFeaturesToTrack(frame_pre, img_tmp1, img_tmp2,		// 特徴点の抽出
+						feature_pre, &count, 0.001, 5, NULL);
+					// オプティカルフロー検出
+					cvCalcOpticalFlowPyrLK(frame_pre, frame_now, pyramid_pre, pyramid_now,
+						feature_pre, feature_now, count, cvSize(10, 10),
+						4, status, NULL, criteria, 0);
+
+					cvSetZero(img_out);				// 結果画像初期化
+					for (i = 0; i < count; i++){		// オプティカルフロー描画
+						cvLine(img_out, cvPointFrom32f(feature_pre[i]),
+							cvPointFrom32f(feature_now[i]), CV_RGB(255, 255, 255), 1, CV_AA, 0);
+					}
+
+					cvFlip(frame_in, frame_in, 1);
+					cvFlip(img_out, img_out, 1);
+
+					cvShowImage("入力映像", frame_in);
+					cvShowImage("オプティカルフロー", img_out);
+					cvCopy(frame_now, frame_pre);	// 現在画像を事前画像にコピー
+
+					//モーション履歴
+					frame = cvQueryFrame(src); if (frame == NULL) break;		// 1フレーム取得
+
+					cvCvtColor(frame, frame_now_m, CV_BGR2GRAY);				// グレースケール変換
+					cvAbsDiff(frame_pre_m, frame_now_m, diff);					// 直前フレームとの差分を抽出
+					cvThreshold(diff, diff, 60, 1, CV_THRESH_BINARY);		// 差分を2値化
+					time_s = (double)clock() / CLOCKS_PER_SEC;				// 現在時間（秒）の取得
+					cvUpdateMotionHistory(diff, hist_32, time_s, 1);		// 履歴画像を作成
+					cvConvertScale(hist_32, hist_8, 255, -(time_s - 1) * 255);	// 0～255にスケーリング
+					cvZero(hist);											// 履歴画像を初期化
+					cvMerge(hist_8, 0, 0, 0, hist);				// 履歴画像を3チャネルカラー画像化
+					cvCalcMotionGradient(hist_32, hist_8, direction, 0.5, 0.05, 3);	// 方向画像作成
+					// 履歴画像と方向画像から全体の動き方向を計算
+					angle = 360 - cvCalcGlobalOrientation(direction, hist_8, hist_32, time_s, 1);
+
+					cvLine(hist, cvPoint(size.width / 2, size.height / 2),		// 動き方向ラインを描画
+						cvPoint(size.width / 2 + int(100 * cos(angle*CV_PI / 180)),
+						size.height / 2 - int(100 * sin(angle*CV_PI / 180))),
+						CV_RGB(255, 0, 0), 3, CV_AA, 0);
+
+					cvFlip(hist, hist, 1);			// 左右反転（鏡面モード）
+					cvCopy(frame_now_m, frame_pre_m);	// 現在フレームを次ループの直前フレームとして保持
+
+					cvShowImage("モーションテンプレート", hist);	// 履歴画像1フレーム表示
+
+					if (cvWaitKey(30) == 32)
+					{
+						printf("\n終了します\n");
+						break;	// Space keyを押した時終了
+					}
+				}
+				// ウィンドウ・キャプチャ・画像リソースの解放
+				cvDestroyWindow("モーションテンプレート");
+				cvDestroyWindow("入力映像");
+				cvDestroyWindow("オプティカルフロー");
+				cvReleaseCapture(&src);
+				cvReleaseImage(&frame_now);	cvReleaseImage(&frame_pre);	cvReleaseImage(&img_out);
+				cvReleaseImage(&img_tmp1); cvReleaseImage(&img_tmp2); cvReleaseImage(&pyramid_pre);
+				cvReleaseImage(&pyramid_now);
+
+				cvReleaseImage(&frame_now_m);	cvReleaseImage(&frame_pre_m);	cvReleaseImage(&diff);
+				cvReleaseImage(&hist);		cvReleaseImage(&hist_8);	cvReleaseImage(&hist_32);
+				cvReleaseImage(&direction);
+				cvShowImage("Camera", image1);
+				D(key);
+			}
 			else{
 				flagM = 0;
 				D(key);
@@ -1706,6 +1837,7 @@ int main(int argc, char **argv)
 				D(key);
 				flagM = 0;
 			}
+			key = 32;
 		}
 		//実験応用動作ここまで-----------------------------------------------------------------------------
 	}
