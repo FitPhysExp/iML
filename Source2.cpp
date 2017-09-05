@@ -724,6 +724,16 @@ int main(int argc, char **argv)
 			cvShowImage("Camera", image1);
 			D(key);
 		}
+		//背景画像を撮影する-----------------------------------
+		if (key == 'b'){
+			IplImage *output = cvQueryFrame(videoCapture1);
+
+			sprintf_s(strB, "%s\\背景.bmp", FolderName);
+			cvSaveImage(strB, output);
+
+			fprintf(stderr, "背景用画像の保存に成功しました\n");
+			D(key);
+		}
 		//設定枚数分の画像を直接HDに保存する------------------------------------------------------------------------
 		if (key == 'S'){
 			fprintf(stderr, "画像保存開始.\n");
@@ -793,7 +803,7 @@ int main(int argc, char **argv)
 			sprintf_s(strR, "%s\\数値データ\\結果データ.csv", FolderName);
 			if (error = fopen_s(&file, strR, "w") != 0){
 				printf("%s\n", strR);
-				fprintf(stderr, 
+				fprintf(stderr,
 					"結果データに書き込めません.処理を中断します.\n"
 					"（Excelなどで開いていると書き込めませんので閉じてください.）\n\n"
 					);
@@ -805,7 +815,7 @@ int main(int argc, char **argv)
 
 			//for csv
 			if (fscanClock() == -1){
-				fprintf(stderr, 
+				fprintf(stderr,
 					"撮影データがありません.\n"
 					"撮影を行ってください.\n\n"
 					);
@@ -821,7 +831,7 @@ int main(int argc, char **argv)
 
 			//読み込み失敗
 			if (tmp_img == NULL) {
-				fprintf(stderr, 
+				fprintf(stderr,
 					"テンプレート画像の読込みに失敗しました.\n"
 					"テンプレート画像を作成してください.\n\n"
 					);
@@ -832,7 +842,7 @@ int main(int argc, char **argv)
 
 			//read config.txt
 			if (error = fopen_s(&file_config, "./実験フォルダ/Config.txt", "r") != 0){
-				fprintf(stderr, 
+				fprintf(stderr,
 					"Config.txt の読込みに失敗しました.\n"
 					"再起動してください.\n\n"
 					);
@@ -852,7 +862,7 @@ int main(int argc, char **argv)
 
 				//読み込み失敗
 				if (src_img == NULL) {
-					fprintf(stderr, 
+					fprintf(stderr,
 						"撮影画像の読込みに失敗しました.\n"
 						"撮影画像をやり直してください.\n\n"
 						);
@@ -918,7 +928,7 @@ int main(int argc, char **argv)
 			sprintf_s(strR, "%s\\数値データ\\結果データ.csv", FolderName);
 			if (error = fopen_s(&file, strR, "w") != 0){
 				printf("%s\n", strT);
-				fprintf(stderr, 
+				fprintf(stderr,
 					"結果データに書き込めません.\n"
 					"（Excelなどで開いていると書き込めません.）\n\n"
 					);
@@ -979,7 +989,7 @@ int main(int argc, char **argv)
 			sprintf_s(strR, "%s\\テンプレート.bmp", FolderName);						//template picture as bmp format
 			tmp_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 			if (tmp_img == NULL) {//読み込み失敗
-				fprintf(stderr, 
+				fprintf(stderr,
 					"テンプレート画像の読込みに失敗しました.\n"
 					"テンプレート画像を作成してください.\n\n"
 					);
@@ -992,7 +1002,7 @@ int main(int argc, char **argv)
 
 			//read config.txt
 			if (error = fopen_s(&file_config, "./実験フォルダ/Config.txt", "r") != 0){
-				fprintf(stderr, 
+				fprintf(stderr,
 					"Config.txt の読込みに失敗しました.\n"
 					"再起動してください.\n\n"
 					);
@@ -1523,6 +1533,127 @@ int main(int argc, char **argv)
 				sprintf_s(strRT, "%s\\テンプレート色検出.bmp", FolderName);
 				sprintf_s(strRout, "%s\\色検出撮影画像\\outputpic_", FolderName);
 				sprintf_s(strReff, "%s\\色検出処理画像\\Effected_", FolderName);
+				flagM = 1;
+			}
+			//物検出-------------------------------------------
+			else if (!strcmp(app, "mono")){
+				_mkdir("実験フォルダ\\撮影差分画像");
+				_mkdir("実験フォルダ\\処理差分画像");
+				int myFILECOUNT = fscanClock();
+				if (myFILECOUNT == -1){
+					fprintf(stderr, "撮影データがありません.\n");
+					fprintf(stderr, "撮影を行ってください.\n\n");
+					cvShowImage("Camera", image1);
+					D(key);
+					continue;
+				}
+
+				IplImage *frame, *frame_h, *img_diff, *img_diff_1;	// 画像リソース宣言
+				CvMat *mat_src, *mat_src_h, *mat_diff, *mat_diff1;	// 行列リソース宣言
+				IplImage *img_out;
+				CvSeq *circles = 0;
+				cv::Mat mat_out2;
+				cv::Mat mat_out;
+				cv::Mat frame_in;
+				int win, hei;
+				char strR[_MAX_PATH] = "";
+				char strS[_MAX_PATH] = "";
+				sprintf_s(strR, "%s\\背景.bmp", FolderName);
+				frame_h = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
+				if (frame_h == NULL){
+					printf("not file\n");
+					cvWaitKey(0);
+					return 0;
+				}
+				frame = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
+				if (frame == NULL){
+					printf("not file\n");
+					cvWaitKey(0);
+					return 0;
+				}
+
+				// 画像リソース確保
+				img_diff = cvCreateImage(cvSize(frame->width, frame->height), IPL_DEPTH_8U, 3);
+				img_diff_1 = cvCreateImage(cvSize(frame->width, frame->height), IPL_DEPTH_8U, 1);
+				img_out = cvCreateImage(cvSize(frame->width, frame->height), IPL_DEPTH_8U, 1);
+				// 32bit浮動小数点数型3チャネルの行列リソースを準備
+				mat_diff = cvCreateMat(frame->height, frame->width, CV_32FC3);
+				mat_diff1 = cvCreateMat(frame->height, frame->width, CV_32FC3);
+				mat_src = cvCreateMat(frame->height, frame->width, CV_32FC3);
+				mat_src_h = cvCreateMat(frame->height, frame->width, CV_32FC3);
+
+				cvSetZero(mat_diff); cvSetZero(mat_src); // 0で初期化
+				cvSetZero(mat_diff1); cvSetZero(mat_src_h);
+				cvConvert(frame_h, mat_src_h); // 入力画像を浮動小数点数型行列に変換
+
+				for (i = 0; i < myFILECOUNT; i++){
+
+					printf("%d\n", i);
+					sprintf_s(strR, "%s\\撮影画像\\outputpic_%04d.bmp", FolderName, i);
+					frame = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
+					if (frame == NULL){
+						printf("not file\n");
+						cvWaitKey(0);
+						return 0;
+					}
+					cvConvert(frame, mat_src); // 入力画像を浮動小数点数型行列に変換
+
+					cvAbsDiff(mat_src_h, mat_src, mat_diff1);		// 差分の計算
+
+					cvConvert(mat_diff1, img_diff);	// 浮動小数点数型行列を画像に変換
+
+					int ts1 = 10, ts2 = 250;
+					cvCvtColor(img_diff, img_diff_1, CV_BGR2GRAY);
+					cvThreshold(img_diff_1, img_out, ts1, ts2, CV_THRESH_BINARY);
+
+					sprintf_s(strS, "%s\\撮影差分画像\\outputpic_%04d.bmp", FolderName, i);
+					cvSaveImage(strS, img_out);
+
+					frame_in = cv::imread(strR);
+					if (frame_in.empty()){
+						printf("not file\n");
+						cvWaitKey(0);
+						return 0;
+					}
+					mat_out = cv::imread(strS);
+					if (mat_out.empty()){
+						printf("not file\n");
+						cvWaitKey(0);
+						return 0;
+					}
+					win = mat_out.rows;
+					hei = mat_out.cols;
+					mat_out2 = cv::Mat(cv::Size(hei, win), CV_8UC3);
+
+					for (int y = 0; y < win; y++)
+					{
+						for (int x = 0; x < hei; x++)
+						{
+							int a1 = mat_out.step*y + (x * 3);
+							if (!(mat_out.data[a1] == 0)){
+								mat_out2.data[a1] = frame_in.data[a1];
+								mat_out2.data[a1 + 1] = frame_in.data[a1 + 1];
+								mat_out2.data[a1 + 2] = frame_in.data[a1 + 2];
+							}
+							else{
+								mat_out2.data[a1] = 0;
+								mat_out2.data[a1 + 1] = 0;
+								mat_out2.data[a1 + 2] = 0;
+							}
+						}
+					}
+					cv::imwrite(strS, mat_out2);
+				}
+				// ウィンドウ・キャプチャ・画像リソースの解放
+				cvReleaseImage(&img_diff); cvReleaseImage(&img_diff_1); cvReleaseImage(&img_out);
+				cvReleaseMat(&mat_src);	cvReleaseMat(&mat_diff); cvReleaseMat(&mat_diff1); cvReleaseMat(&mat_src_h);
+
+				printf("物体検出が終わりました\n");
+
+				sprintf_s(strRcsv, "%s\\数値データ\\差分結果データ.csv", FolderName);
+				sprintf_s(strRT, "%s\\テンプレート.bmp", FolderName);
+				sprintf_s(strRout, "%s\\撮影差分画像\\outputpic_", FolderName);
+				sprintf_s(strReff, "%s\\処理差分画像\\Effected_", FolderName);
 				flagM = 1;
 			}
 			else if (!strcmp(app, "op")){
