@@ -1153,7 +1153,7 @@ int main(int argc, char **argv)
 		//実験応用動作ここから-----------------------------------------------------------------------------
 		if (key == '@'){
 			char app[10];
-			printf("edge,rgb,colorのいずれかを入力してください\n実行しない場合は'N'\n");
+			printf("edge,rgb,color,mono,opのいずれかを入力してください\n実行しない場合は'N'\n");
 			scanf_s("%s", app, 10);
 			const std::string stra(app);
 
@@ -1561,7 +1561,7 @@ int main(int argc, char **argv)
 				sprintf_s(strR, "%s\\背景.bmp", FolderName);
 				frame_h = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 				if (frame_h == NULL){
-					printf("not file\n");
+					printf("not file\n'b'を押して背景画像を撮影してください\n");
 					cvWaitKey(0);
 					return 0;
 				}
