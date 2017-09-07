@@ -247,6 +247,7 @@ void saveClock0(int i){
 int main(int argc, char **argv)
 {
 	int i, test, max = 0, M;
+	int back_R = 0, back_G = 0, back_B = 0;
 	int Savecount = -1;//判断処理用変数
 	double min_val, max_val;
 	double Cmax, Cmin;
@@ -1535,6 +1536,30 @@ int main(int argc, char **argv)
 				sprintf_s(strReff, "%s\\色検出処理画像\\Effected_", FolderName);
 				flagM = 1;
 			}
+			//物検出の背景色設定-------------------------------------------
+			else if (!strcmp(app, "back")){
+				printf("Rの値(0～255),Gの値(0～255),Bの値(0～255)を空白で区切って3つ入力してください。\n");
+
+				printf("現在の（R,G,B）の数値 :（ %d, %d, %d )\n", back_R, back_G, back_B);
+				int appR, appG, appB;
+				std::cin >> appR >> appG >> appB;    // キーボードから入力を受ける
+				if (appR >= 0 && appR <= 255){
+					back_R = appR;
+				}
+				if (appG >= 0 && appG <= 255){
+					back_G = appG;
+				}
+				if (appB >= 0 && appB <= 255){
+					back_B = appB;
+				}
+
+				printf("変更後の（R,G,B）の数値 :（ %d, %d, %d )\n",back_R,back_G, back_B);
+
+				flagM = 0;
+				cin.clear();
+				cin.ignore();
+				D(key);
+			}
 			//物検出-------------------------------------------
 			else if (!strcmp(app, "mono")){
 				_mkdir("実験フォルダ\\撮影差分画像");
@@ -1598,11 +1623,12 @@ int main(int argc, char **argv)
 					}
 					cvConvert(frame, mat_src); // 入力画像を浮動小数点数型行列に変換
 
-					cvAbsDiff(mat_src_h, mat_src, mat_diff1);		// 差分の計算
+					cvAbsDiff(mat_src_h, mat_src, mat_diff1);	// 差分の計算
 
 					cvConvert(mat_diff1, img_diff);	// 浮動小数点数型行列を画像に変換
 
-					int ts1 = 10, ts2 = 250;
+					//二値化処理での閾値
+					int ts1 = 10, ts2 = 250;	//TODO
 					cvCvtColor(img_diff, img_diff_1, CV_BGR2GRAY);
 					cvThreshold(img_diff_1, img_out, ts1, ts2, CV_THRESH_BINARY);
 
@@ -1630,15 +1656,15 @@ int main(int argc, char **argv)
 						for (int x = 0; x < hei; x++)
 						{
 							int a1 = mat_out.step*y + (x * 3);
-							if (!(mat_out.data[a1] == 0)){
+							if (!(mat_out.data[a1] == 0)){//背景画像との差分があるとき
 								mat_out2.data[a1] = frame_in.data[a1];
 								mat_out2.data[a1 + 1] = frame_in.data[a1 + 1];
 								mat_out2.data[a1 + 2] = frame_in.data[a1 + 2];
 							}
 							else{
-								mat_out2.data[a1] = 0;
-								mat_out2.data[a1 + 1] = 0;
-								mat_out2.data[a1 + 2] = 0;
+								mat_out2.data[a1] = back_B;
+								mat_out2.data[a1 + 1] = back_G;
+								mat_out2.data[a1 + 2] = back_R;
 							}
 						}
 					}
