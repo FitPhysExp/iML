@@ -656,6 +656,7 @@ int main(int argc, char **argv)
 				}
 			}
 			D(key);
+			key = 32;
 		}
 		if (key == '8'){
 			system("explorer \"実験フォルダ");//エクスプローラーで対象を開く
@@ -1154,7 +1155,7 @@ int main(int argc, char **argv)
 		//実験応用動作ここから-----------------------------------------------------------------------------
 		if (key == '@'){
 			char app[10];
-			printf("edge,rgb,color,mono,opのいずれかを入力してください\n実行しない場合は'N'\n");
+			printf("edge,rgb,color,rgbcolor,mono,op,backのいずれかを入力してください\n実行しない場合は'N'\n");
 			scanf_s("%s", app, 10);
 			const std::string stra(app);
 
@@ -1188,7 +1189,6 @@ int main(int argc, char **argv)
 
 				if (imgT_in == NULL){
 					printf("not file\n");
-					cvWaitKey(0);
 					continue;
 				}
 
@@ -1211,8 +1211,7 @@ int main(int argc, char **argv)
 					img_in = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 
 					if (img_in == NULL){
-						printf("not file\n");
-						cvWaitKey(0);
+						printf("not file %s\n",strR);
 						continue;
 					}
 					img_out = cvCreateImage(cvSize(img_in->width, img_in->height), IPL_DEPTH_8U, 1);
@@ -1260,7 +1259,6 @@ int main(int argc, char **argv)
 
 				if (imgT_in == NULL){
 					printf("not file\n");
-					cvWaitKey(0);
 					continue;
 				}
 
@@ -1316,7 +1314,6 @@ int main(int argc, char **argv)
 
 					if (img_in == NULL){
 						printf("not file\n");
-						cvWaitKey(0);
 						continue;
 					}
 
@@ -1384,7 +1381,6 @@ int main(int argc, char **argv)
 				cv::Mat input_imgT = cv::imread(strR, 1);
 				if (input_imgT.empty()){
 					printf("not file\n");
-					cvWaitKey(0);
 					continue;
 				}
 				cv::Mat smooth_imgT;
@@ -1485,7 +1481,6 @@ int main(int argc, char **argv)
 					cv::Mat input_img = cv::imread(strR, 1);
 					if (input_img.empty()){
 						printf("not file\n");
-						cvWaitKey(0);
 						continue;
 					}
 					int win = input_img.rows, hei = input_img.cols;
@@ -1534,6 +1529,196 @@ int main(int argc, char **argv)
 				sprintf_s(strRT, "%s\\テンプレート色検出.bmp", FolderName);
 				sprintf_s(strRout, "%s\\色検出撮影画像\\outputpic_", FolderName);
 				sprintf_s(strReff, "%s\\色検出処理画像\\Effected_", FolderName);
+				flagM = 1;
+			}
+			//RGB色検出-------------------------------------------
+			else if (!strcmp(app, "rgbcolor")){
+				_mkdir("実験フォルダ\\RGB色検出撮影画像");
+				_mkdir("実験フォルダ\\RGB色検出処理画像");
+				int myFILECOUNT = fscanClock();
+				if (myFILECOUNT == -1){
+					fprintf(stderr, "撮影データがありません.\n");
+					fprintf(stderr, "撮影を行ってください.\n\n");
+					cvShowImage("Camera", image1);
+					D(key);
+					continue;
+				}
+
+				IplImage *imgT_in;
+				int  r_ave, g_ave, b_ave, e_temp;
+				CvScalar ave;
+				IplImage *img_r, *img_g, *img_b, *img_R, *img_G, *img_B;
+
+				//テンプレートからRGBを抽出---------------------------------------
+				sprintf_s(strR, "%s\\テンプレート.bmp", FolderName);//画像選択
+				imgT_in = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
+				if (imgT_in == NULL){
+					printf("not file\n");
+					continue;
+				}
+
+				img_R = cvCreateImage(cvGetSize(imgT_in), IPL_DEPTH_8U, 1);
+				img_G = cvCreateImage(cvGetSize(imgT_in), IPL_DEPTH_8U, 1);
+				img_B = cvCreateImage(cvGetSize(imgT_in), IPL_DEPTH_8U, 1);
+
+				img_r = cvCreateImage(cvGetSize(imgT_in), IPL_DEPTH_8U, 3);
+				img_g = cvCreateImage(cvGetSize(imgT_in), IPL_DEPTH_8U, 3);
+				img_b = cvCreateImage(cvGetSize(imgT_in), IPL_DEPTH_8U, 3);
+
+				cvSetZero(img_r); cvSetZero(img_g); cvSetZero(img_b);
+
+				cvSplit(imgT_in, img_R, img_G, img_B, NULL);
+
+				cvMerge(NULL, NULL, img_R, NULL, img_r);
+				cvMerge(NULL, img_G, NULL, NULL, img_g);
+				cvMerge(img_B, NULL, NULL, NULL, img_b);
+
+				ave = cvAvg(imgT_in);
+				r_ave = (int)ave.val[2];
+				g_ave = (int)ave.val[1];
+				b_ave = (int)ave.val[0];
+
+				if ((ave.val[2] > ave.val[1]) && (ave.val[2] > ave.val[0])){
+					e_temp = 2;	printf("red\n");
+				}
+				else if ((ave.val[1] > ave.val[2]) && (ave.val[1] > ave.val[0])){
+					e_temp = 1; printf("green\n");
+				}
+				else {
+					e_temp = 0; printf("brue\n");
+				}
+
+				//------------------------------------------------------------
+
+				cv::Mat input_imgT = cv::imread(strR, 1);
+				if (input_imgT.empty()){
+					printf("not file\n");
+					continue;
+				}
+				cv::Mat smooth_imgT;
+				cv::Mat hsv_imgT;
+				cv::medianBlur(input_imgT, smooth_imgT, 7);	//ノイズがあるので平滑化
+				cv::cvtColor(smooth_imgT, hsv_imgT, CV_BGR2HSV);	//HSVに変換
+				int s_ave = 0, v_ave = 0;
+				int winT = input_imgT.rows, heiT = input_imgT.cols, winhei;
+				double r = 0.0, th = 0.0, xT = 0.0, yT = 0.0;
+				for (int y = 0; y < winT; y++)
+				{
+					for (int x = 0; x < heiT; x++)
+					{
+						int a1 = hsv_imgT.step*y + (x * 3);
+						s_ave += hsv_imgT.data[a1 + 1];
+						v_ave += hsv_imgT.data[a1 + 2];
+					}
+				}
+				winhei = winT * heiT;
+				s_ave = s_ave / winhei;
+				v_ave = v_ave / winhei;
+
+				int s_ave1 = 0, v_ave1 = 0;
+				int s_ave2 = 0, v_ave2 = 0;
+				int sn1 = 0, sn2 = 150, vn1 = 50, vn2 = 100;		//表示範囲
+
+				s_ave1 = imgavemin(s_ave, sn1); s_ave2 = imgavemax(s_ave, sn2);
+				v_ave1 = imgavemin(v_ave, vn1); v_ave2 = imgavemax(v_ave, vn2);
+
+				cv::Mat hsv_skin_imgT = cv::Mat(cv::Size(heiT, winT), CV_8UC3);
+				hsv_skin_imgT = cv::Scalar(0, 0, 0);
+
+				for (int y = 0; y < winT; y++)
+				{
+					for (int x = 0; x < heiT; x++)
+					{
+						int a = hsv_imgT.step*y + (x * 3);
+						if (e_temp == 2 && (hsv_imgT.data[a + 1] > s_ave1 && hsv_imgT.data[a + 1] < s_ave2) && (hsv_imgT.data[a + 2] > v_ave1 && hsv_imgT.data[a + 2] < v_ave2)){
+							if ((hsv_imgT.data[a] > 0 && hsv_imgT.data[a] <= 30) || (hsv_imgT.data[a] >= 150 && hsv_imgT.data[a] < 180))
+							{
+								hsv_skin_imgT.data[a] = 0;
+								hsv_skin_imgT.data[a + 1] = 0;
+								hsv_skin_imgT.data[a + 2] = 255;
+							}
+						}
+						else if (e_temp == 1 && (hsv_imgT.data[a + 1] > s_ave1 && hsv_imgT.data[a + 1] < s_ave2) && (hsv_imgT.data[a + 2] > v_ave1 && hsv_imgT.data[a + 2] < v_ave2)){
+							if ((hsv_imgT.data[a] >= 30 && hsv_imgT.data[a] <= 90))
+							{
+								hsv_skin_imgT.data[a] = 0;
+								hsv_skin_imgT.data[a + 1] = 255;
+								hsv_skin_imgT.data[a + 2] = 0;
+							}
+						}
+						else if (e_temp == 0 && (hsv_imgT.data[a + 1] > s_ave1 && hsv_imgT.data[a + 1] < s_ave2) && (hsv_imgT.data[a + 2] > v_ave1 && hsv_imgT.data[a + 2] < v_ave2)){
+							if ((hsv_imgT.data[a] >= 90 && hsv_imgT.data[a] <= 150))
+							{
+								hsv_skin_imgT.data[a] = 255;
+								hsv_skin_imgT.data[a + 1] = 0;
+								hsv_skin_imgT.data[a + 2] = 0;
+							}
+						}
+					}
+				}
+
+				sprintf_s(strS, "%s\\テンプレートrgb色検出.bmp", FolderName);
+				cv::imwrite(strS, hsv_skin_imgT);
+
+				for (int i = 0; i < myFILECOUNT; i++){
+					sprintf_s(strR, "%s\\撮影画像\\outputpic_%04d.bmp", FolderName, i);
+					cv::Mat input_img = cv::imread(strR, 1);
+					if (input_img.empty()){
+						printf("not file\n");
+						continue;
+					}
+					int win = input_img.rows, hei = input_img.cols;
+					cv::Mat hsv_skin_img = cv::Mat(cv::Size(hei, win), CV_8UC3);
+					cv::Mat smooth_img;
+					cv::Mat hsv_img;
+
+					hsv_skin_img = cv::Scalar(0, 0, 0);
+					cv::medianBlur(input_img, smooth_img, 7);	//ノイズがあるので平滑化
+					cv::cvtColor(smooth_img, hsv_img, CV_BGR2HSV);	//HSVに変換
+
+					printf("%d\n", i);
+					for (int y = 0; y < win; y++)
+					{
+						for (int x = 0; x < hei; x++)
+						{
+							int a = hsv_img.step*y + (x * 3);
+							if (e_temp == 2 && (hsv_img.data[a + 1] > s_ave1 && hsv_img.data[a + 1] < s_ave2) && (hsv_img.data[a + 2] > v_ave1 && hsv_img.data[a + 2] < v_ave2)){
+								if ((hsv_img.data[a] > 0 && hsv_img.data[a] <= 30) || (hsv_img.data[a] >= 150 && hsv_img.data[a] < 180))
+								{
+									hsv_skin_img.data[a] = 0;
+									hsv_skin_img.data[a + 1] = 0;
+									hsv_skin_img.data[a + 2] = 255;
+								}
+							}
+							else if (e_temp == 1 && (hsv_img.data[a + 1] > s_ave1 && hsv_img.data[a + 1] < s_ave2) && (hsv_img.data[a + 2] > v_ave1 && hsv_img.data[a + 2] < v_ave2)){
+								if (hsv_img.data[a] >= 30 && hsv_img.data[a] <= 90)
+								{
+									hsv_skin_img.data[a] = 0;
+									hsv_skin_img.data[a + 1] = 255;
+									hsv_skin_img.data[a + 2] = 0;
+								}
+							}
+							else if (e_temp == 0 && (hsv_img.data[a + 1] > s_ave1 && hsv_img.data[a + 1] < s_ave2) && (hsv_img.data[a + 2] > v_ave1 && hsv_img.data[a + 2] < v_ave2)){
+								if (hsv_img.data[a] >= 90 && hsv_img.data[a] <= 150)
+								{
+									hsv_skin_img.data[a] = 255;
+									hsv_skin_img.data[a + 1] = 0;
+									hsv_skin_img.data[a + 2] = 0;
+								}
+							}
+						}
+					}
+
+					sprintf_s(strS, "%s\\RGB色検出撮影画像\\outputpic_%04d.bmp", FolderName, i);
+					cv::imwrite(strS, hsv_skin_img);
+				}
+
+				printf("RGB色検出が終わりました\n");
+
+				sprintf_s(strRcsv, "%s\\数値データ\\RGB色検出結果データ.csv", FolderName);
+				sprintf_s(strRT, "%s\\テンプレートRGB色検出.bmp", FolderName);
+				sprintf_s(strRout, "%s\\RGB色検出撮影画像\\outputpic_", FolderName);
+				sprintf_s(strReff, "%s\\RGB色検出処理画像\\Effected_", FolderName);
 				flagM = 1;
 			}
 			//物検出の背景色設定-------------------------------------------
@@ -1587,14 +1772,12 @@ int main(int argc, char **argv)
 				frame_h = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 				if (frame_h == NULL){
 					printf("not file\n'b'を押して背景画像を撮影してください\n");
-					cvWaitKey(0);
-					return 0;
+					continue;
 				}
 				frame = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 				if (frame == NULL){
 					printf("not file\n");
-					cvWaitKey(0);
-					return 0;
+					continue;
 				}
 
 				// 画像リソース確保
@@ -1618,8 +1801,7 @@ int main(int argc, char **argv)
 					frame = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
 					if (frame == NULL){
 						printf("not file\n");
-						cvWaitKey(0);
-						return 0;
+						continue;
 					}
 					cvConvert(frame, mat_src); // 入力画像を浮動小数点数型行列に変換
 
@@ -1638,14 +1820,12 @@ int main(int argc, char **argv)
 					frame_in = cv::imread(strR);
 					if (frame_in.empty()){
 						printf("not file\n");
-						cvWaitKey(0);
-						return 0;
+						continue;
 					}
 					mat_out = cv::imread(strS);
 					if (mat_out.empty()){
 						printf("not file\n");
-						cvWaitKey(0);
-						return 0;
+						continue;
 					}
 					win = mat_out.rows;
 					hei = mat_out.cols;
@@ -1689,7 +1869,7 @@ int main(int argc, char **argv)
 				char status[COUNT];
 				CvPoint2D32f feature_pre[COUNT];	// 浮動小数点数型座標の特徴点
 				CvPoint2D32f feature_now[COUNT];
-				CvCapture* src;								// ビデオキャプチャ宣言
+				CvCapture* src_op;								// ビデオキャプチャ宣言
 				IplImage *frame_in, *frame_now, *frame_pre, *img_out;	// 画像リソース宣言
 				IplImage *img_tmp1, *img_tmp2, *pyramid_now, *pyramid_pre;
 				double th, h, S = 255, V = 255, r, g, b, max, min;
@@ -1698,10 +1878,10 @@ int main(int argc, char **argv)
 				CvTermCriteria criteria;
 				criteria = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
 
-				src = cvCaptureFromCAM(0); // 映像取得（カメラ映像）
-				if (src == NULL){ printf("映像が取得できません。\n"); cvWaitKey(0); return -1; }
+				src_op = cvCaptureFromCAM(0); // 映像取得（カメラ映像）
+				if (src_op == NULL){ printf("映像が取得できません。\n"); continue; }
 
-				frame_in = cvQueryFrame(src); // 初期フレーム取得
+				frame_in = cvQueryFrame(src_op); // 初期フレーム取得
 				frame_now = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 1); // 画像リソース確保
 				frame_pre = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 1);
 				img_out = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 3);
@@ -1711,7 +1891,7 @@ int main(int argc, char **argv)
 					IPL_DEPTH_8U, 1);
 				pyramid_now = cvCreateImage(cvSize(frame_in->width + 8, frame_in->height / 3),
 					IPL_DEPTH_8U, 1);
-				frame_in = cvQueryFrame(src);					// 現在フレーム取得
+				frame_in = cvQueryFrame(src_op);					// 現在フレーム取得
 				cvCvtColor(frame_in, frame_pre, CV_BGR2GRAY);	// グレースケール変換（事前画像準備）
 
 				//モーション履歴
@@ -1721,7 +1901,7 @@ int main(int argc, char **argv)
 				IplImage *hist, *hist_8, *hist_32, *direction;
 
 
-				frame = cvQueryFrame(src);	// 初期フレーム取得
+				frame = cvQueryFrame(src_op);	// 初期フレーム取得
 
 				size = cvSize(frame->width, frame->height);	// 入力サイズ取得
 				// 画像領域確保・初期化
@@ -1739,7 +1919,7 @@ int main(int argc, char **argv)
 
 				while (1){
 					//オプティカルフロー
-					frame_in = cvQueryFrame(src); if (frame_in == NULL) break;	// 現在フレーム取得
+					frame_in = cvQueryFrame(src_op); if (frame_in == NULL) break;	// 現在フレーム取得
 
 					cvCvtColor(frame_in, frame_now, CV_BGR2GRAY);				// グレースケール変換
 
@@ -1807,7 +1987,7 @@ int main(int argc, char **argv)
 					cvCopy(frame_now, frame_pre);	// 現在画像を事前画像にコピー
 
 					//モーション履歴
-					frame = cvQueryFrame(src); if (frame == NULL) break;		// 1フレーム取得
+					frame = cvQueryFrame(src_op); if (frame == NULL) break;		// 1フレーム取得
 
 					cvCvtColor(frame, frame_now_m, CV_BGR2GRAY);				// グレースケール変換
 					cvAbsDiff(frame_pre_m, frame_now_m, diff);					// 直前フレームとの差分を抽出
@@ -1841,16 +2021,15 @@ int main(int argc, char **argv)
 				cvDestroyWindow("モーションテンプレート");
 				cvDestroyWindow("入力映像");
 				cvDestroyWindow("オプティカルフロー");
-				cvReleaseCapture(&src);
+				cvReleaseCapture(&src_op);
 				cvReleaseImage(&frame_now);	cvReleaseImage(&frame_pre);	cvReleaseImage(&img_out);
 				cvReleaseImage(&img_tmp1); cvReleaseImage(&img_tmp2); cvReleaseImage(&pyramid_pre);
 				cvReleaseImage(&pyramid_now);
-
 				cvReleaseImage(&frame_now_m);	cvReleaseImage(&frame_pre_m);	cvReleaseImage(&diff);
 				cvReleaseImage(&hist);		cvReleaseImage(&hist_8);	cvReleaseImage(&hist_32);
 				cvReleaseImage(&direction);
-				cvShowImage("Camera", image1);
 				D(key);
+				defaultCAM = defaultCAM;
 			}
 			else{
 				flagM = 0;
