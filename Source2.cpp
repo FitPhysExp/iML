@@ -359,6 +359,7 @@ int main(int argc, char **argv)
 			vout = (IplImage **)malloc(sizeof(IplImage *)*FILECOUNT);
 			int i;
 			startClock();
+			//for (i = 0; i < 3000; i++){
 			for (i = 0; i < FILECOUNT; i++){
 				if (GetAsyncKeyState(VK_SPACE) & 0x8000){
 					printf("Space keyが入力されました。記録を終了します。");
@@ -378,7 +379,7 @@ int main(int argc, char **argv)
 				sprintf_s(strS, "%s\\撮影画像\\outputpic_%04d.bmp", FolderName, i);
 				if (vout[i] == NULL) continue;
 				cvShowImage("Camera", vout[i]);
-				cvWaitKey(2);
+				cvWaitKey(1);
 				cvSaveImage(strS, vout[i]);
 				printf("outputpic_%04d.bmp 保存\n", i);
 				cvReleaseImage(&(vout[i]));
@@ -1274,13 +1275,16 @@ int main(int argc, char **argv)
 				cvSetZero(img_g);
 				cvSetZero(img_b);
 
+				ave = cvAvg(imgT_in);
+				/*printf("R = %3d\n", ave.val[2]);
+				printf("G = %3d\n", ave.val[1]);
+				printf("B = %3d\n", ave.val[0]);*/
+
 				cvSplit(imgT_in, img_R, img_G, img_B, NULL);
 
 				cvMerge(NULL, NULL, img_R, NULL, img_r);
 				cvMerge(NULL, img_G, NULL, NULL, img_g);
 				cvMerge(img_B, NULL, NULL, NULL, img_b);
-
-				ave = cvAvg(imgT_in);
 
 				if ((ave.val[2] > ave.val[1]) && (ave.val[2] > ave.val[0]))e_temp = 2;
 				else if ((ave.val[1] > ave.val[2]) && (ave.val[1] > ave.val[0]))e_temp = 1;
@@ -1420,18 +1424,18 @@ int main(int argc, char **argv)
 
 				s_ave = s_ave / winhei;
 				v_ave = v_ave / winhei;
-				/*
+
 				printf("H = %3d\n", h_ave);
 				printf("S = %3d\n", s_ave);
-				printf("V = %3d\n", v_ave);*/
+				printf("V = %3d\n", v_ave);
 
 				int h_ave1 = 0, s_ave1 = 0, v_ave1 = 0;
 				int h_ave2 = 0, s_ave2 = 0, v_ave2 = 0;
 				int flag = 0;
 				//表示範囲
 				int hn = 20;					//TODO
-				int sn1 = 50, sn2 = 150;		//TODO
-				int vn1 = 100, vn2 = 100;		//TODO
+				int sn1 = 100, sn2 = 150;		//TODO
+				int vn1 = 100, vn2 = 150;		//TODO
 
 				h_ave1 = imgaveh1(h_ave, hn); h_ave2 = imgaveh2(h_ave, hn);
 				s_ave1 = imgavemin(s_ave, sn1); s_ave2 = imgavemax(s_ave, sn2);
@@ -1617,7 +1621,7 @@ int main(int argc, char **argv)
 
 				int s_ave1 = 0, v_ave1 = 0;
 				int s_ave2 = 0, v_ave2 = 0;
-				int sn1 = 0, sn2 = 150, vn1 = 50, vn2 = 100;		//表示範囲
+				int sn1 = 50, sn2 = 150, vn1 = 50, vn2 = 150;		//表示範囲
 
 				s_ave1 = imgavemin(s_ave, sn1); s_ave2 = imgavemax(s_ave, sn2);
 				v_ave1 = imgavemin(v_ave, vn1); v_ave2 = imgavemax(v_ave, vn2);
@@ -1809,7 +1813,7 @@ int main(int argc, char **argv)
 
 					cvConvert(mat_diff1, img_diff);	// 浮動小数点数型行列を画像に変換
 
-					//二値化処理での閾値
+					//閾値処理(cvThreshold)での閾値
 					int ts1 = 10, ts2 = 250;	//TODO
 					cvCvtColor(img_diff, img_diff_1, CV_BGR2GRAY);
 					cvThreshold(img_diff_1, img_out, ts1, ts2, CV_THRESH_BINARY);
