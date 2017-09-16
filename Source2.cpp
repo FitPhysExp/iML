@@ -291,8 +291,8 @@ int main(int argc, char **argv)
 
 	if (error = fopen_s(&file_config, "./実験フォルダ/Config.txt", "r") != 0){
 		fopen_s(&file_config, "./実験フォルダ/Config.txt", "w");
-		fprintf(file_config, "0.85");
-		config_val = 0.85;
+		fprintf(file_config, "0.70");
+		config_val = 0.70;
 		fclose(file_config);
 	}
 	else{
@@ -480,6 +480,14 @@ int main(int argc, char **argv)
 					// (1)探索画像全体に対して，テンプレートのマッチング値（指定した手法に依存）を計算
 					dst_size = cvSize(src_img->width - tmp_img->width + 1, src_img->height - tmp_img->height + 1);
 					dst_img = cvCreateImage(dst_size, IPL_DEPTH_32F, 1);
+					/*テンプレートマッチングのmethod(計算方法)の種類
+						CV_TM_SQDIFF		エラー発生
+						CV_TM_CCORR			エラー発生
+						CV_TM_CCOEFF		Correlation coefficient　相関係数
+						CV_TM_SQDIFF_NORMED	SSD(Sum of Squared Difference)　輝度差の二乗和
+						CV_TM_CCORR_NORMED	NCC（Normalized Cross-Correlation）　相互相関の正規化
+						CV_TM_CCOEFF_NORMED	ZNCC（Zero-mean Normalized Cross-Correlation）相関係数の正規化
+						*/
 					cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);//methodも変えつつ検証が必要
 
 					cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
