@@ -65,6 +65,7 @@ void D00(void)		//キー操作一覧のテキスト表示
 	fprintf(stderr,
 		" 0 or q or Esc : このアプリケーションを終了する\n"
 		" 9 :処理画像を表示する\n"
+		" b :背景用画像の保存.\n"
 		" C :相互相関係数分布の表示\n"
 		" d :実験フォルダの作成.\n"
 		" M :テンプレートマッチ（バグ有）\n"
@@ -273,7 +274,7 @@ int main(int argc, char **argv)
 	cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.5, 1.0, 0, 1, CV_AA);
 	cvInitFont(&font_w, CV_FONT_HERSHEY_SIMPLEX, 0.5, 1.0, 0, 3, CV_AA);
 
-	int defaultCAM = 1;// ThinkPad カメラ用の設定
+	int defaultCAM = 0;// ThinkPad カメラ用の設定
 	CvCapture * videoCapture1 = cvCaptureFromCAM(defaultCAM);
 	//１台のみの場合cvCaptureFromCAMの引数はなんでもいい
 	//複数台の場合はPC起動時の接続順が引数になる
@@ -626,8 +627,8 @@ int main(int argc, char **argv)
 		//実験補助動作ここから-----------------------------------------------------------------------------
 		//カメラ切り替え----------------------------------
 		if (key == 'c'){
-			defaultCAM--;
-			if (defaultCAM < 0){ defaultCAM = 3; }
+			defaultCAM++;
+			if (defaultCAM > 2){ defaultCAM = 0; }
 			printf("\n\nカメラ番号を%02dへ変更しました.\n画面の動きがあればOKです\n", defaultCAM);
 			cvReleaseCapture(&videoCapture1);
 			videoCapture1 = cvCaptureFromCAM(defaultCAM);
@@ -1172,14 +1173,7 @@ int main(int argc, char **argv)
 			char strRcsv[_MAX_PATH] = "";
 			char strRout[_MAX_PATH] = "";
 			char strReff[_MAX_PATH] = "";
-			int myFILECOUNT = fscanClock();
-			if (myFILECOUNT == -1){
-				fprintf(stderr, "撮影データがありません.\n");
-				fprintf(stderr, "撮影を行ってください.\n\n");
-				cvShowImage("Camera", image1);
-				D(key);
-				continue;
-			}
+			int myFILECOUNT;
 			int flagM = 0;
 
 			if (!strcmp(app, "N")){
@@ -1215,6 +1209,14 @@ int main(int argc, char **argv)
 				cvReleaseImage(&imgT_in);
 				cvReleaseImage(&imgT_out);
 
+				myFILECOUNT = fscanClock();
+				if (myFILECOUNT == -1){
+					fprintf(stderr, "撮影データがありません.\n");
+					fprintf(stderr, "撮影を行ってください.\n\n");
+					cvShowImage("Camera", image1);
+					D(key);
+					continue;
+				}
 				for (i = 0; i < myFILECOUNT; i++){
 					sprintf_s(strR, "%s\\撮影画像\\outputpic_%04d.bmp", FolderName, i);
 					img_in = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
@@ -1254,7 +1256,7 @@ int main(int argc, char **argv)
 				CvScalar ave;
 				IplImage *img_r, *img_g, *img_b, *img_R, *img_G, *img_B;
 
-				int myFILECOUNT = fscanClock();
+				myFILECOUNT = fscanClock();
 				if (myFILECOUNT == -1){
 					fprintf(stderr, "撮影データがありません.\n");
 					fprintf(stderr, "撮影を行ってください.\n\n");
@@ -1380,7 +1382,7 @@ int main(int argc, char **argv)
 			else if (!strcmp(app, "color")){
 				_mkdir("実験フォルダ\\色検出撮影画像");
 				_mkdir("実験フォルダ\\色検出処理画像");
-				int myFILECOUNT = fscanClock();
+				myFILECOUNT = fscanClock();
 				if (myFILECOUNT == -1){
 					fprintf(stderr, "撮影データがありません.\n");
 					fprintf(stderr, "撮影を行ってください.\n\n");
@@ -1547,7 +1549,7 @@ int main(int argc, char **argv)
 			else if (!strcmp(app, "rgbcolor")){
 				_mkdir("実験フォルダ\\RGB色検出撮影画像");
 				_mkdir("実験フォルダ\\RGB色検出処理画像");
-				int myFILECOUNT = fscanClock();
+				myFILECOUNT = fscanClock();
 				if (myFILECOUNT == -1){
 					fprintf(stderr, "撮影データがありません.\n");
 					fprintf(stderr, "撮影を行ってください.\n\n");
@@ -1761,7 +1763,7 @@ int main(int argc, char **argv)
 			else if (!strcmp(app, "mono")){
 				_mkdir("実験フォルダ\\撮影差分画像");
 				_mkdir("実験フォルダ\\処理差分画像");
-				int myFILECOUNT = fscanClock();
+				myFILECOUNT = fscanClock();
 				if (myFILECOUNT == -1){
 					fprintf(stderr, "撮影データがありません.\n");
 					fprintf(stderr, "撮影を行ってください.\n\n");
@@ -1890,7 +1892,7 @@ int main(int argc, char **argv)
 				CvTermCriteria criteria;
 				criteria = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
 
-				src_op = cvCaptureFromCAM(0); // 映像取得（カメラ映像）
+				src_op = cvCaptureFromCAM(defaultCAM); // 映像取得（カメラ映像）
 				if (src_op == NULL){ printf("映像が取得できません。\n"); continue; }
 
 				frame_in = cvQueryFrame(src_op); // 初期フレーム取得
@@ -1912,10 +1914,9 @@ int main(int argc, char **argv)
 				IplImage *frame, *frame_now_m, *frame_pre_m, *diff;	// 画像変数宣言
 				IplImage *hist, *hist_8, *hist_32, *direction;
 
-
 				frame = cvQueryFrame(src_op);	// 初期フレーム取得
-
 				size = cvSize(frame->width, frame->height);	// 入力サイズ取得
+
 				// 画像領域確保・初期化
 				frame_pre_m = cvCreateImage(size, IPL_DEPTH_8U, 1); cvZero(frame_pre_m);
 				frame_now_m = cvCreateImage(size, IPL_DEPTH_8U, 1); cvZero(frame_now_m);
