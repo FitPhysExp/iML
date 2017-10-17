@@ -249,6 +249,7 @@ int main(int argc, char **argv)
 {
 	int i, test, max = 0, M;
 	int back_R = 0, back_G = 0, back_B = 0;
+	int flag_Temp = 0;
 	int Savecount = -1;//判断処理用変数
 	double min_val, max_val;
 	double Cmax, Cmin;
@@ -403,6 +404,7 @@ int main(int argc, char **argv)
 			for (int i1 = 0; i1 < FILECOUNT_MAX; i1++){
 				val4files[i1] = -0.01;
 			}
+			flag_Temp = 0;
 
 			//----------------------------------------------------------------------
 			printf("\n\n解析処理を行います.\n");
@@ -432,6 +434,7 @@ int main(int argc, char **argv)
 				continue;
 			}
 			printf("%d個のテンプレートマッチング処理を行います。少々お待ちください。\n", myFILECOUNT);
+			printf("(Space key で中断)\n");
 
 			//読み込み
 			sprintf_s(strR, "%s\\テンプレート.bmp", FolderName);//template picture as bmp format
@@ -464,6 +467,11 @@ int main(int argc, char **argv)
 			}
 			bool use_src_img = FALSE;
 			for (i = 0; i < myFILECOUNT; i++){
+				if (GetAsyncKeyState(VK_SPACE) & 0x8000){
+					printf("Space keyが入力されました。テンプレートマッチング処理を中断します.\n");
+					flag_Temp = 1;
+					break;
+				}
 				sprintf_s(strR, "%s\\撮影画像\\outputpic_%04d.bmp", FolderName, i);
 				if (use_src_img){
 					cvReleaseImage(&src_img);
@@ -545,71 +553,75 @@ int main(int argc, char **argv)
 				}
 
 			}
-			if (use_src_img){
-				cvReleaseImage(&src_img);
-			}
-			cvReleaseImage(&tmp_img);
-			fprintf(stderr,
-				"マッチング処理が終了しました。\n"
-				"結果データをCSVファイルに書き込みます。\n"
-				);
 
-			//テンプレートマッチの結果データの書き込み
-			sprintf_s(strR, "%s\\数値データ\\結果データ.csv", FolderName);
-			if (error = fopen_s(&file, strR, "w") != 0){
-				printf("%s\n", strT);
+			if (flag_Temp == 0){
+				if (use_src_img){
+					cvReleaseImage(&src_img);
+				}
+				cvReleaseImage(&tmp_img);
 				fprintf(stderr,
-					"結果データに書き込めません.\n"
-					"（Excelなどで開いていると書き込めません.）\n\n"
+					"マッチング処理が終了しました。\n"
+					"結果データをCSVファイルに書き込みます。\n"
 					);
-				cvShowImage("Camera", image1);
-				D(key);
-				continue;
-			}
 
-			//結果CSV1行目の記述
-			fprintf(file, "画像ファイル名,t[s],x[pixel],y[pixel],X[meter],Y[meter],類似度,,←１ピクセルが何メートルか？\n");
+				//テンプレートマッチの結果データの書き込み
+				sprintf_s(strR, "%s\\数値データ\\結果データ.csv", FolderName);
+				if (error = fopen_s(&file, strR, "w") != 0){
+					printf("%s\n", strT);
+					fprintf(stderr,
+						"結果データに書き込めません.\n"
+						"（Excelなどで開いていると書き込めません.）\n\n"
+						);
+					cvShowImage("Camera", image1);
+					D(key);
+					continue;
+				}
 
-			if (num_effected != 0){
-				//各行の記述
-				int c = 2; // line number of csv file (start from 2)
-				int flagcsv = 0;
-				double elatime, elatime0;
-				char *ale;
-				for (i = 0; i < myFILECOUNT; i++){
-					if (val4files[i] < config_val){
-						//printf("%d skiped\n",i);
-						//getchar();
-					}
-					//数値データにファイル名など座標、エクセル上での計算式を出力させる
-					else{
-						if (flagcsv == 0){
-							elatime0 = strtod(sprintClock(i), &ale);
-							flagcsv = 1;
+				//結果CSV1行目の記述
+				fprintf(file, "画像ファイル名,t[s],x[pixel],y[pixel],X[meter],Y[meter],類似度,,←１ピクセルが何メートルか？\n");
+
+				if (num_effected != 0){
+					//各行の記述
+					int c = 2; // line number of csv file (start from 2)
+					int flagcsv = 0;
+					double elatime, elatime0;
+					char *ale;
+					for (i = 0; i < myFILECOUNT; i++){
+						if (val4files[i] < config_val){
+							//printf("%d skiped\n",i);
+							//getchar();
 						}
-						char FName[50];
-						sprintf_s(FName, "img_%04d.bmp", i);
-						fprintf(file, FName);	//ファイル名&時刻データを出力
-						elatime = strtod(sprintClock(i), &ale);
-						elatime -= elatime0;
-						fprintf(file, ",%.6lf", elatime);	//１フレームごとの時間座標を数値データ出力
-						fprintf(file, XYpoint[i]);	//XY座標を数値データ出力
-						fprintf(file, ",=(C%d-$C$2)*$H$1,=(D%d-$D$2)*$H$1", c, c);	//xとyを数値データ出力
-						fprintf(file, ",%.6lf", val4files[i]);
-						fprintf(file, "\n");	//改行しないと横1列になる
-						c++;
+						//数値データにファイル名など座標、エクセル上での計算式を出力させる
+						else{
+							if (flagcsv == 0){
+								elatime0 = strtod(sprintClock(i), &ale);
+								flagcsv = 1;
+							}
+							char FName[50];
+							sprintf_s(FName, "img_%04d.bmp", i);
+							fprintf(file, FName);	//ファイル名&時刻データを出力
+							elatime = strtod(sprintClock(i), &ale);
+							elatime -= elatime0;
+							fprintf(file, ",%.6lf", elatime);	//１フレームごとの時間座標を数値データ出力
+							fprintf(file, XYpoint[i]);	//XY座標を数値データ出力
+							fprintf(file, ",=(C%d-$C$2)*$H$1,=(D%d-$D$2)*$H$1", c, c);	//xとyを数値データ出力
+							fprintf(file, ",%.6lf", val4files[i]);
+							fprintf(file, "\n");	//改行しないと横1列になる
+							c++;
+						}
 					}
 				}
+				fclose(file);
+
+				printf("数値データ出力が終了しました.\n");
+
+				printf("\n\n類似度%.1f%%以上の検出結果\n全%d枚中 %d枚検出できました.\n\n", config_val*100.0, num_bmp, num_effected);
+				printf("---------検出数が少ない場合の対処---------\n");
+				printf("※テンプレート画像やConfig.txtを変更し再度Match Templateの実行.\n");
 			}
-			fclose(file);
-
-			printf("数値データ出力が終了しました.\n");
-
-			printf("\n\n類似度%.1f%%以上の検出結果\n全%d枚中 %d枚検出できました.\n\n", config_val*100.0, num_bmp, num_effected);
-			printf("---------検出数が少ない場合の対処---------\n");
-			printf("※テンプレート画像やConfig.txtを変更し再度Match Templateの実行.\n");
 			cvShowImage("Camera", image1);
 			D(key);
+			key = 32;
 		}
 		if (key == '5'){
 			system("explorer \"実験フォルダ\\数値データ\\結果データ.csv");		//エクスプローラーで対象を開く
@@ -2052,6 +2064,7 @@ int main(int argc, char **argv)
 
 			if (flagM != 0){
 				//マッチテンプレート
+				flag_Temp = 0;
 				int num_bmp = 0;
 				int num_effected = 0;
 				IplImage *tmp_img;
@@ -2101,6 +2114,11 @@ int main(int argc, char **argv)
 				}
 				bool use_src_img = FALSE;
 				for (i = 0; i < myFILECOUNT; i++){
+					if (GetAsyncKeyState(VK_SPACE) & 0x8000){
+						printf("Space keyが入力されました。テンプレートマッチング処理を中断します.\n");
+						flag_Temp = 1;
+						break;
+					}
 					sprintf_s(strR, "%s%04d.bmp", strRout, i);
 					if (use_src_img){
 						cvReleaseImage(&src_img);
@@ -2168,64 +2186,66 @@ int main(int argc, char **argv)
 						}
 					}
 				}
-				if (use_src_img){
-					cvReleaseImage(&src_img);
-				}
-				cvReleaseImage(&tmp_img);
-				fprintf(stderr,
-					"マッチング処理が終了しました。\n"
-					"結果データをCSVファイルに書き込みます。\n"
-					);
-				//結果データの書き込み
-				if (error = fopen_s(&file, strRcsv, "w") != 0){
-					printf("%s\n", strT);
-					fprintf(stderr, "結果データに書き込めません.\n");
-					fprintf(stderr, "（Excelなどで開いていると書き込めません.）\n\n");
-					cvShowImage("Camera", image1);
-					D(key);
-					continue;
-				}
+				if (flag_Temp == 0){
+					if (use_src_img){
+						cvReleaseImage(&src_img);
+					}
+					cvReleaseImage(&tmp_img);
+					fprintf(stderr,
+						"マッチング処理が終了しました。\n"
+						"結果データをCSVファイルに書き込みます。\n"
+						);
+					//結果データの書き込み
+					if (error = fopen_s(&file, strRcsv, "w") != 0){
+						printf("%s\n", strT);
+						fprintf(stderr, "結果データに書き込めません.\n");
+						fprintf(stderr, "（Excelなどで開いていると書き込めません.）\n\n");
+						cvShowImage("Camera", image1);
+						D(key);
+						continue;
+					}
 
-				//結果CSV1行目の記述
-				fprintf(file, "画像ファイル名,t[s],x[pixel],y[pixel],X[meter],Y[meter],類似度,,←１ピクセルが何メートルか？\n");
+					//結果CSV1行目の記述
+					fprintf(file, "画像ファイル名,t[s],x[pixel],y[pixel],X[meter],Y[meter],類似度,,←１ピクセルが何メートルか？\n");
 
-				if (num_effected != 0){
-					//各行の記述
-					int c = 2; // line number of csv file (start from 2)
-					int flagcsv = 0;
-					double elatime, elatime0;
-					char *ale;
-					for (int i = 0; i < myFILECOUNT; i++){
-						if (val4files[i] < config_val){
-							//printf("%d skiped\n",i);
-							//getchar();
-						}
-						//数値データにファイル名など座標、エクセル上での計算式を出力させる
-						else{
-							if (flagcsv == 0){
-								elatime0 = strtod(sprintClock(i), &ale);
-								flagcsv = 1;
+					if (num_effected != 0){
+						//各行の記述
+						int c = 2; // line number of csv file (start from 2)
+						int flagcsv = 0;
+						double elatime, elatime0;
+						char *ale;
+						for (int i = 0; i < myFILECOUNT; i++){
+							if (val4files[i] < config_val){
+								//printf("%d skiped\n",i);
+								//getchar();
 							}
-							char FName[50];
-							sprintf_s(FName, "img_%04d.bmp", i);
-							fprintf(file, FName);	//ファイル名&時刻データを出力
-							elatime = strtod(sprintClock(i), &ale);
-							elatime -= elatime0;
-							fprintf(file, ",%.6lf", elatime);	//１フレームごとの時間座標を数値データ出力
-							fprintf(file, XYpoint[i]);	//XY座標を数値データ出力
-							fprintf(file, ",=(C%d-$C$2)*$H$1,=(D%d-$D$2)*$H$1", c, c);	//xとyを数値データ出力
-							fprintf(file, ",%.6lf", val4files[i]);
-							fprintf(file, "\n");		//改行しないと横1列になる
-							c++;
+							//数値データにファイル名など座標、エクセル上での計算式を出力させる
+							else{
+								if (flagcsv == 0){
+									elatime0 = strtod(sprintClock(i), &ale);
+									flagcsv = 1;
+								}
+								char FName[50];
+								sprintf_s(FName, "img_%04d.bmp", i);
+								fprintf(file, FName);	//ファイル名&時刻データを出力
+								elatime = strtod(sprintClock(i), &ale);
+								elatime -= elatime0;
+								fprintf(file, ",%.6lf", elatime);	//１フレームごとの時間座標を数値データ出力
+								fprintf(file, XYpoint[i]);	//XY座標を数値データ出力
+								fprintf(file, ",=(C%d-$C$2)*$H$1,=(D%d-$D$2)*$H$1", c, c);	//xとyを数値データ出力
+								fprintf(file, ",%.6lf", val4files[i]);
+								fprintf(file, "\n");		//改行しないと横1列になる
+								c++;
+							}
 						}
 					}
-				}
-				fclose(file);
-				printf("数値データ出力が終了しました.\n");
+					fclose(file);
+					printf("数値データ出力が終了しました.\n");
 
-				printf("\n\n類似度%.1f%%以上の検出結果\n全%d枚中 %d枚検出できました.\n\n", config_val*100.0, num_bmp, num_effected);
-				printf("---------検出数が少ない場合の対処---------\n");
-				printf("※テンプレート画像やConfig.txtを変更し再度Match Templateの実行.\n");
+					printf("\n\n類似度%.1f%%以上の検出結果\n全%d枚中 %d枚検出できました.\n\n", config_val*100.0, num_bmp, num_effected);
+					printf("---------検出数が少ない場合の対処---------\n");
+					printf("※テンプレート画像やConfig.txtを変更し再度Match Templateの実行.\n");
+				}
 				cvShowImage("Camera", image1);
 				D(key);
 				flagM = 0;
