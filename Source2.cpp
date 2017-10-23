@@ -275,7 +275,20 @@ int main(int argc, char **argv)
 	cvInitFont(&font, CV_FONT_HERSHEY_SIMPLEX, 0.5, 1.0, 0, 1, CV_AA);
 	cvInitFont(&font_w, CV_FONT_HERSHEY_SIMPLEX, 0.5, 1.0, 0, 3, CV_AA);
 
+	int flagCam = 0;
+	int iCAM = 0;
 	int defaultCAM = 0;// ThinkPad カメラ用の設定
+	CvCapture * videoCaptureCAM;
+	//defaultCAMの値設定
+	for (iCAM = defaultCAM; iCAM >= 0; iCAM--){
+		videoCaptureCAM = cvCaptureFromCAM(iCAM);
+		if (flagCam == 0){
+			if (!(videoCaptureCAM == NULL)){
+				defaultCAM = iCAM;
+				flagCam = 1;
+			}
+		}
+	}
 	CvCapture * videoCapture1 = cvCaptureFromCAM(defaultCAM);
 	//１台のみの場合cvCaptureFromCAMの引数はなんでもいい
 	//複数台の場合はPC起動時の接続順が引数になる
@@ -639,8 +652,22 @@ int main(int argc, char **argv)
 		//実験補助動作ここから-----------------------------------------------------------------------------
 		//カメラ切り替え----------------------------------
 		if (key == 'c'){
-			defaultCAM++;
-			if (defaultCAM > 2){ defaultCAM = 0; }
+			videoCaptureCAM;
+			flagCam = 0;
+			defaultCAM--;
+			if (defaultCAM < 0){
+				defaultCAM = 3;
+			}
+			for (iCAM = defaultCAM; iCAM >= 0; iCAM--){
+				videoCaptureCAM = cvCaptureFromCAM(iCAM);
+				if (flagCam == 0){
+					if (!(videoCaptureCAM == NULL)){
+						defaultCAM = iCAM;
+						flagCam = 1;
+					}
+				}
+			}
+
 			printf("\n\nカメラ番号を%02dへ変更しました.\n画面の動きがあればOKです\n", defaultCAM);
 			cvReleaseCapture(&videoCapture1);
 			videoCapture1 = cvCaptureFromCAM(defaultCAM);
