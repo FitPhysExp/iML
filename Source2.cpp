@@ -256,6 +256,7 @@ int main(int argc, char **argv)
 	double min_val, max_val;
 	double Cmax, Cmin;
 	double config_val;//Config.txt から読み込む類似度
+	char passkou[50];
 	CvPoint min_loc, max_loc;
 	CvPoint Pmin, Pmax;
 	CvSize dst_size;
@@ -367,12 +368,18 @@ int main(int argc, char **argv)
 			//	IplImage output = frame;
 			IplImage *output = cvQueryFrame(videoCapture1);
 
+
 			sprintf_s(strB, "%s\\較正用画像_%02d.bmp", FolderName,kou);
 			cvSaveImage(strB, output);
-			kou++;
 
 			fprintf(stderr, "較正用画像_%02d.bmpの保存に成功しました\n", kou);
+			fprintf(stderr, "較正用画像_%02d.bmpを開きます\n", kou);
+
+			sprintf_s(passkou, "mspaint \"実験フォルダ\\較正用画像_%02d.bmp", kou);
+			system(passkou);
+			kou++;
 			D(key);
+			key = 32;
 		}
 		//ペイントで対象(テンプレート用画像)を開く-------------------------------------------
 		if (key == '2'){
