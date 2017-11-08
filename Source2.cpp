@@ -256,12 +256,14 @@ int main(int argc, char **argv)
 	double min_val, max_val;
 	double Cmax, Cmin;
 	double config_val;//Config.txt から読み込む類似度
+
 	char passkou[50];
 	CvPoint min_loc, max_loc;
 	CvPoint Pmin, Pmax;
 	CvSize dst_size;
 	IplImage *src_img, *dst_img;
 	IplImage *img_ccoeff;
+	time_t now_kou = time(NULL);
 
 	//-------------------------------------------------------------------------------
 	char strB[_MAX_PATH] = "";
@@ -367,15 +369,19 @@ int main(int argc, char **argv)
 		if (key == 'k'){
 			//	IplImage output = frame;
 			IplImage *output = cvQueryFrame(videoCapture1);
+			
+			int hour_kou = (now_kou / 3600 + 9) % 24;
+			int min_kou = now_kou / 60 % 60;
+			int sec_kou = now_kou % 60;
+			printf("%02d%02d%02d_%02d", hour_kou, min_kou, sec_kou, kou);
 
-
-			sprintf_s(strB, "%s\\較正用画像_%02d.bmp", FolderName,kou);
+			sprintf_s(strB, "%s\\較正用画像_%02d%02d%02d_%02d.bmp", FolderName, hour_kou, min_kou, sec_kou, kou);
 			cvSaveImage(strB, output);
 
-			fprintf(stderr, "較正用画像_%02d.bmpの保存に成功しました\n", kou);
-			fprintf(stderr, "較正用画像_%02d.bmpを開きます\n", kou);
+			fprintf(stderr, "較正用画像_%02d%02d%02d_%02d.bmpの保存に成功しました\n", hour_kou, min_kou, sec_kou, kou);
+			fprintf(stderr, "較正用画像_%02d%02d%02d_%02d.bmpを開きます\n", hour_kou, min_kou, sec_kou, kou);
 
-			sprintf_s(passkou, "mspaint \"実験フォルダ\\較正用画像_%02d.bmp", kou);
+			sprintf_s(passkou, "mspaint \"実験フォルダ\\較正用画像_%02d%02d%02d_%02d.bmp", hour_kou, min_kou, sec_kou, kou);
 			system(passkou);
 			kou++;
 			D(key);
