@@ -373,17 +373,21 @@ int main(int argc, char **argv)
 			int hour_kou = (now_kou / 3600 + 9) % 24;
 			int min_kou = now_kou / 60 % 60;
 			int sec_kou = now_kou % 60;
-			printf("%02d%02d%02d_%02d", hour_kou, min_kou, sec_kou, kou);
 
-			sprintf_s(strB, "%s\\較正用画像_%02d%02d%02d_%02d.bmp", FolderName, hour_kou, min_kou, sec_kou, kou);
+			//sprintf_s(strB, "%s\\較正用画像_%02d%02d%02d_%02d.bmp", FolderName, hour_kou, min_kou, sec_kou, kou);
+			sprintf_s(strB, "%s\\較正_%02d%02d%02d.bmp", FolderName, hour_kou, min_kou, sec_kou);
 			cvSaveImage(strB, output);
 
-			fprintf(stderr, "較正用画像_%02d%02d%02d_%02d.bmpの保存に成功しました\n", hour_kou, min_kou, sec_kou, kou);
-			fprintf(stderr, "較正用画像_%02d%02d%02d_%02d.bmpを開きます\n", hour_kou, min_kou, sec_kou, kou);
+			/*fprintf(stderr, "較正用画像_%02d%02d%02d_%02d.bmpの保存に成功しました\n", hour_kou, min_kou, sec_kou, kou);
+			fprintf(stderr, "較正用画像_%02d%02d%02d_%02d.bmpを開きます\n", hour_kou, min_kou, sec_kou, kou);*/
+			fprintf(stderr, "較正_%02d%02d%02d.bmpの保存に成功しました\n", hour_kou, min_kou, sec_kou);
+			fprintf(stderr, "較正_%02d%02d%02d.bmpを開きます\n", hour_kou, min_kou, sec_kou);
 
-			sprintf_s(passkou, "mspaint \"実験フォルダ\\較正用画像_%02d%02d%02d_%02d.bmp", hour_kou, min_kou, sec_kou, kou);
+			//sprintf_s(passkou, "mspaint \"実験フォルダ\\較正用画像_%02d%02d%02d_%02d.bmp", hour_kou, min_kou, sec_kou, kou);
+			sprintf_s(passkou, "mspaint \"実験フォルダ\\較正_%02d%02d%02d.bmp", hour_kou, min_kou, sec_kou);
 			system(passkou);
 			kou++;
+			printf("%2d枚目の較正用画像を保存しました\n\n", kou);
 			D(key);
 			key = 32;
 		}
