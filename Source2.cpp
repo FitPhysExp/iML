@@ -382,10 +382,17 @@ int main(int argc, char **argv)
 			fprintf(stderr, "較正用画像_%02d%02d%02d_%02d.bmpを開きます\n", hour_kou, min_kou, sec_kou, kou);*/
 			fprintf(stderr, "較正_%02d%02d%02d.bmpの保存に成功しました\n", hour_kou, min_kou, sec_kou);
 			fprintf(stderr, "較正_%02d%02d%02d.bmpを開きます\n", hour_kou, min_kou, sec_kou);
-
-			//sprintf_s(passkou, "mspaint \"実験フォルダ\\較正用画像_%02d%02d%02d_%02d.bmp", hour_kou, min_kou, sec_kou, kou);
-			sprintf_s(passkou, "mspaint \"実験フォルダ\\較正_%02d%02d%02d.bmp", hour_kou, min_kou, sec_kou);
-			system(passkou);
+/*
+			printf("較正用画像が開かれています\n");
+			sprintf_s(passkou, "mspaint \"実験フォルダ\\較正用画像_%02d%02d%02d_%02d.bmp", hour_kou, min_kou, sec_kou, kou);
+			printf("ペイントを閉じてください\n");
+			system(passkou);*/
+			sprintf_s(passkou, "実験フォルダ\\較正_%02d%02d%02d.bmp", hour_kou, min_kou, sec_kou);
+			//ShellExecuteで使うためにchar型からTCHAR型に変更
+			TCHAR passkou_TCHAR[50];
+			int pass_i = MultiByteToWideChar(CP_ACP, 0, passkou, -1, NULL, 0);
+			MultiByteToWideChar(CP_ACP, 0, passkou, -1, passkou_TCHAR, pass_i);
+			ShellExecute(NULL, TEXT("open"), TEXT("mspaint"), passkou_TCHAR, NULL, SW_SHOW);
 			kou++;
 			printf("%2d枚目の較正用画像を保存しました\n\n", kou);
 			D(key);
@@ -393,7 +400,11 @@ int main(int argc, char **argv)
 		}
 		//ペイントで対象(テンプレート用画像)を開く-------------------------------------------
 		if (key == '2'){
-			system("mspaint \"実験フォルダ\\テンプレート.bmp");
+			//TODO ShellExecute関数とsystem関数でファイルを開いた時の動作がどう変わるか見てみてください
+			printf("テンプレート用画像を開きます\n", kou);
+			ShellExecute(NULL, TEXT("open"), TEXT("mspaint"), TEXT("実験フォルダ\\テンプレート.bmp"), NULL, SW_SHOW);
+			
+			//system("mspaint \"実験フォルダ\\テンプレート.bmp");
 			D(key);
 			key = 32;
 		}
@@ -670,7 +681,11 @@ int main(int argc, char **argv)
 			key = 32;
 		}
 		if (key == '5'){
-			system("explorer \"実験フォルダ\\数値データ\\結果データ.csv");		//エクスプローラーで対象を開く
+			//TODO ShellExecute関数とsystem関数でファイルを開いた時の動作がどう変わるか見てみてください
+			printf("数値データを出力しています.\n");
+			ShellExecute(NULL, TEXT("open"), TEXT("explorer"), TEXT("実験フォルダ\\数値データ\\結果データ.csv"), NULL, SW_SHOW);	//エクスプローラーで対象を開く
+			printf("数値データを出力しました.\n");
+			//system("explorer \"実験フォルダ\\数値データ\\結果データ.csv");		//エクスプローラーで対象を開く
 			D(key);
 			key = 32;
 		}
@@ -1271,7 +1286,7 @@ int main(int argc, char **argv)
 
 				imgT_out = cvCreateImage(cvSize(imgT_in->width, imgT_in->height), IPL_DEPTH_8U, 1);
 				//エッジ検出の閾値設定
-				int n1 = 50, n2 = 150;		//TODO
+				int n1 = 50, n2 = 150;		//TODO　n1とn2の値を変更してエッジの違いを見てください
 				cvCanny(imgT_in, imgT_out, n1, n2);
 
 				sprintf_s(strS, "%s\\テンプレートエッジ.bmp", FolderName);
@@ -1517,9 +1532,9 @@ int main(int argc, char **argv)
 				int h_ave2 = 0, s_ave2 = 0, v_ave2 = 0;
 				int flag = 0;
 				//表示範囲
-				int hn = 20;					//TODO
-				int sn1 = 100, sn2 = 150;		//TODO
-				int vn1 = 100, vn2 = 150;		//TODO
+				int hn = 20;					//TODO　変数を変えるとどのように変わるか見てみましょう
+				int sn1 = 100, sn2 = 150;		//TODO　変数を変えるとどのように変わるか見てみましょう
+				int vn1 = 100, vn2 = 150;		//TODO　変数を変えるとどのように変わるか見てみましょう
 
 				h_ave1 = imgaveh1(h_ave, hn); h_ave2 = imgaveh2(h_ave, hn);
 				s_ave1 = imgavemin(s_ave, sn1); s_ave2 = imgavemax(s_ave, sn2);
@@ -1898,7 +1913,7 @@ int main(int argc, char **argv)
 					cvConvert(mat_diff1, img_diff);	// 浮動小数点数型行列を画像に変換
 
 					//閾値処理(cvThreshold)での閾値
-					int ts1 = 10, ts2 = 250;	//TODO
+					int ts1 = 10, ts2 = 250;	//TODO　変数の値を変えるとどう変わるのか見てみましょう
 					cvCvtColor(img_diff, img_diff_1, CV_BGR2GRAY);
 					cvThreshold(img_diff_1, img_out, ts1, ts2, CV_THRESH_BINARY);
 
