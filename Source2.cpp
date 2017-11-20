@@ -264,6 +264,7 @@ int main(int argc, char **argv)
 	IplImage *src_img, *dst_img;
 	IplImage *img_ccoeff;
 	time_t now_kou = time(NULL);
+	int hour_kou = 0, min_kou = 0, sec_kou = 0;
 
 	//-------------------------------------------------------------------------------
 	char strB[_MAX_PATH] = "";
@@ -369,10 +370,10 @@ int main(int argc, char **argv)
 		if (key == 'k'){
 			//	IplImage output = frame;
 			IplImage *output = cvQueryFrame(videoCapture1);
-			
-			int hour_kou = (now_kou / 3600 + 9) % 24;
-			int min_kou = now_kou / 60 % 60;
-			int sec_kou = now_kou % 60;
+			now_kou = time(NULL);
+			hour_kou = (now_kou / 3600 + 9) % 24;
+			min_kou = now_kou / 60 % 60;
+			sec_kou = now_kou % 60;
 
 			//sprintf_s(strB, "%s\\較正用画像_%02d%02d%02d_%02d.bmp", FolderName, hour_kou, min_kou, sec_kou, kou);
 			sprintf_s(strB, "%s\\較正_%02d%02d%02d.bmp", FolderName, hour_kou, min_kou, sec_kou);
@@ -684,13 +685,42 @@ int main(int argc, char **argv)
 			//TODO ShellExecute関数とsystem関数でファイルを開いた時の動作がどう変わるか見てみてください
 			printf("数値データを出力しています.\n");
 			ShellExecute(NULL, TEXT("open"), TEXT("explorer"), TEXT("実験フォルダ\\数値データ\\結果データ.csv"), NULL, SW_SHOW);	//エクスプローラーで対象を開く
-			printf("数値データを出力しました.\n");
 			//system("explorer \"実験フォルダ\\数値データ\\結果データ.csv");		//エクスプローラーで対象を開く
 			D(key);
 			key = 32;
 		}
 		else if (key == '6'){
 			system("xcopy /S /C /I /Y \".\\実験フォルダ\" %date:~-5,2%%date:~-2%%time:~0,2%%time:~3,2%%time:~6,2%");
+			D(key);
+			key = 32;
+		}
+		else if (key == 'f'){
+			int myFILECOUNT = fscanClock();
+			if (myFILECOUNT == -1){
+				fprintf(stderr,
+					"撮影画像データがありません.\n"
+					"手順'3'を行ってください.\n\n"
+					);
+				cvShowImage("Camera", image1);
+				D(key);
+				continue;
+			}
+			now_kou = time(NULL);
+			hour_kou = (now_kou / 3600 + 9) % 24;
+			min_kou = now_kou / 60 % 60;
+			sec_kou = now_kou % 60;
+			char str_Asys[_MAX_PATH] = "";
+			char str_Bsys[_MAX_PATH] = "";
+
+			sprintf_s(str_Asys, "%02d%02d%02d", hour_kou, min_kou, sec_kou);
+			sprintf_s(str_Bsys, "xcopy /C /I /Y .\\実験フォルダ\\較正_*.bmp %s\\", str_Asys);
+			system(str_Bsys);
+			sprintf_s(str_Bsys, "xcopy /C /I /Y .\\実験フォルダ\\数値データ\\結果データ.csv %s\\", str_Asys);
+			system(str_Bsys);
+			sprintf_s(str_Bsys, "xcopy /C /I /Y .\\実験フォルダ\\撮影画像\\outputpic_%04d.bmp %s\\", myFILECOUNT / 2, str_Asys);
+			system(str_Bsys);
+			sprintf_s(str_Bsys, "xcopy /C /I /Y .\\実験フォルダ\\処理画像\\Effected_%04d.bmp %s\\", myFILECOUNT / 2, str_Asys);
+			system(str_Bsys);
 			D(key);
 			key = 32;
 		}
