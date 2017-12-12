@@ -248,20 +248,23 @@ void saveClock0(int i){
 
 int main(int argc, char **argv)
 {
-	int i, test, max = 0, M;
+	int i, test, test_2, max = 0, M;
 	int back_R = 0, back_G = 0, back_B = 0;
 	int kou = 0;
 	int flag_Temp = 0;
 	int Savecount = -1;//判断処理用変数
 	double min_val, max_val;
+	double min_val_2, max_val_2;
 	double Cmax, Cmin;
 	double config_val;//Config.txt から読み込む類似度
 
 	char passkou[50];
 	CvPoint min_loc, max_loc;
+	CvPoint min_loc_2, max_loc_2;
 	CvPoint Pmin, Pmax;
 	CvSize dst_size;
-	IplImage *src_img, *dst_img;
+	CvSize dst_size_2;
+	IplImage *src_img, *dst_img, *dst_img_2;
 	IplImage *img_ccoeff;
 	time_t now_kou = time(NULL);
 	int hour_kou = 0, min_kou = 0, sec_kou = 0;
@@ -383,11 +386,11 @@ int main(int argc, char **argv)
 			fprintf(stderr, "較正用画像_%02d%02d%02d_%02d.bmpを開きます\n", hour_kou, min_kou, sec_kou, kou);*/
 			fprintf(stderr, "較正_%02d%02d%02d.bmpの保存に成功しました\n", hour_kou, min_kou, sec_kou);
 			fprintf(stderr, "較正_%02d%02d%02d.bmpを開きます\n", hour_kou, min_kou, sec_kou);
-/*
-			printf("較正用画像が開かれています\n");
-			sprintf_s(passkou, "mspaint \"実験フォルダ\\較正用画像_%02d%02d%02d_%02d.bmp", hour_kou, min_kou, sec_kou, kou);
-			printf("ペイントを閉じてください\n");
-			system(passkou);*/
+			/*
+						printf("較正用画像が開かれています\n");
+						sprintf_s(passkou, "mspaint \"実験フォルダ\\較正用画像_%02d%02d%02d_%02d.bmp", hour_kou, min_kou, sec_kou, kou);
+						printf("ペイントを閉じてください\n");
+						system(passkou);*/
 			sprintf_s(passkou, "実験フォルダ\\較正_%02d%02d%02d.bmp", hour_kou, min_kou, sec_kou);
 			//ShellExecuteで使うためにchar型からTCHAR型に変更
 			TCHAR passkou_TCHAR[50];
@@ -404,7 +407,7 @@ int main(int argc, char **argv)
 			//TODO ShellExecute関数とsystem関数でファイルを開いた時の動作がどう変わるか見てみてください
 			printf("テンプレート用画像を開きます\n", kou);
 			ShellExecute(NULL, TEXT("open"), TEXT("mspaint"), TEXT("実験フォルダ\\テンプレート.bmp"), NULL, SW_SHOW);
-			
+
 			//system("mspaint \"実験フォルダ\\テンプレート.bmp");
 			D(key);
 			key = 32;
@@ -713,9 +716,11 @@ int main(int argc, char **argv)
 			char str_Bsys[_MAX_PATH] = "";
 
 			sprintf_s(str_Asys, "%02d%02d%02d", hour_kou, min_kou, sec_kou);
+			sprintf_s(str_Bsys, "xcopy /C /I /Y .\\実験フォルダ\\テンプレート*.bmp %s\\", str_Asys);
+			system(str_Bsys);
 			sprintf_s(str_Bsys, "xcopy /C /I /Y .\\実験フォルダ\\較正_*.bmp %s\\", str_Asys);
 			system(str_Bsys);
-			sprintf_s(str_Bsys, "xcopy /C /I /Y .\\実験フォルダ\\数値データ\\結果データ.csv %s\\", str_Asys);
+			sprintf_s(str_Bsys, "xcopy /C /I /Y .\\実験フォルダ\\数値データ\\結果データ*.csv %s\\", str_Asys);
 			system(str_Bsys);
 			sprintf_s(str_Bsys, "xcopy /C /I /Y .\\実験フォルダ\\撮影画像\\outputpic_%04d.bmp %s\\", myFILECOUNT / 2, str_Asys);
 			system(str_Bsys);
@@ -2162,6 +2167,386 @@ int main(int argc, char **argv)
 				cvReleaseImage(&direction);
 				D(key);
 				defaultCAM = defaultCAM;
+			}
+			//画像の1枚の保存を行う------------------------------------------------------------------------------
+			else if (!strcmp(app, "temp")){
+				//	IplImage output = frame;
+				IplImage *output = cvQueryFrame(videoCapture1);
+
+				sprintf_s(strB, "%s\\テンプレート_2.bmp", FolderName);
+				cvSaveImage(strB, output);
+				ShellExecute(NULL, TEXT("open"), TEXT("mspaint"), TEXT("実験フォルダ\\テンプレート_2.bmp"), NULL, SW_SHOW);
+
+				fprintf(stderr, "2つ目のテンプレート用画像の保存に成功しました\n");
+				D(key);
+			}
+			//テンプレートマッチ_2-------------------------------------------------
+			else if (!strcmp(app, "tm")){
+
+				int num_bmp = 0;
+				int num_effected = 0;
+				IplImage *tmp_img, *tmp_img_2;
+				char XYpoint[FILECOUNT_MAX/2][20];//座標取得の文字列20文字
+				double val4files[FILECOUNT_MAX];//類似度
+				for (int i1 = 0; i1 < FILECOUNT_MAX; i1++){
+					val4files[i1] = -0.01;
+				}
+				char XYpoint_2[FILECOUNT_MAX/2][20];//座標取得の文字列20文字
+				double val4files_2[FILECOUNT_MAX];//類似度
+				for (int i2 = 0; i2 < FILECOUNT_MAX; i2++){
+					val4files_2[i2] = -0.01;
+				}
+				flag_Temp = 0;
+
+				//----------------------------------------------------------------------
+				printf("\n\n解析処理を行います.\n");
+				// precheck for 結果データ
+				sprintf_s(strR, "%s\\数値データ\\結果データ.csv", FolderName);
+				if (error = fopen_s(&file, strR, "w") != 0){
+					printf("%s\n", strR);
+					fprintf(stderr,
+						"結果データに書き込めません.処理を中断します.\n"
+						"（Excelなどで開いていると書き込めませんので閉じてください.）\n\n"
+						);
+					cvShowImage("Camera", image1);
+					D(key);
+					continue;
+				}
+				else{ fclose(file); }
+
+				//for csv
+				int myFILECOUNT = fscanClock();
+				if (myFILECOUNT == -1){
+					fprintf(stderr,
+						"撮影画像データがありません.\n"
+						"手順'3'を行ってください.\n\n"
+						);
+					cvShowImage("Camera", image1);
+					D(key);
+					continue;
+				}
+				printf("%d個のテンプレートマッチング処理を行います。少々お待ちください。\n", myFILECOUNT);
+				printf("(Space key で中断)\n");
+
+				//読み込み
+				sprintf_s(strR, "%s\\テンプレート.bmp", FolderName);//template picture as bmp format
+				tmp_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
+
+				//読み込み失敗
+				if (tmp_img == NULL) {
+					fprintf(stderr,
+						"テンプレート画像の読込みに失敗しました.\n"
+						"手順'1'を行ってください.\n\n"
+						);
+					cvShowImage("Camera", image1);
+					D(key);
+					continue;
+				}
+				//読み込み
+				sprintf_s(strR, "%s\\テンプレート_2.bmp", FolderName);
+				tmp_img_2 = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
+
+				//読み込み失敗
+				if (tmp_img_2 == NULL) {
+					fprintf(stderr,
+						"2つ目のテンプレート画像の読込みに失敗しました.\n"
+						"'@'を押して'temp'と入力し、テンプレート2の作成を行ってください.\n\n"
+						);
+					cvShowImage("Camera", image1);
+					D(key);
+					continue;
+				}
+
+				//read config.txt
+				if (error = fopen_s(&file_config, "./実験フォルダ/Config.txt", "r") != 0){
+					fprintf(stderr,
+						"Config.txt の読込みに失敗しました.\n"
+						"再起動(手順'0')してください.\n\n"
+						);
+					cvShowImage("Camera", image1);
+					D(key);
+					continue;
+				}
+				else{
+					fscanf_s(file_config, "%lf", &config_val);
+					fclose(file_config);
+				}
+				bool use_src_img = FALSE;
+				for (i = 0; i < myFILECOUNT; i++){
+					if (GetAsyncKeyState(VK_SPACE) & 0x8000){
+						printf("Space keyが入力されました。テンプレートマッチング処理を中断します.\n");
+						flag_Temp = 1;
+						break;
+					}
+					sprintf_s(strR, "%s\\撮影画像\\outputpic_%04d.bmp", FolderName, i);
+					if (use_src_img){
+						cvReleaseImage(&src_img);
+					}
+					src_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
+					use_src_img = TRUE;
+
+					//読み込み失敗
+					if (src_img == NULL) {
+						printf("撮影画像の読込みに失敗しました.\n");
+					}
+					else{
+						num_bmp++;
+						printf("outputpic_%04d.bmp:", i);
+						// (1)探索画像全体に対して，テンプレートのマッチング値（指定した手法に依存）を計算
+						dst_size = cvSize(src_img->width - tmp_img->width + 1, src_img->height - tmp_img->height + 1);
+						dst_img = cvCreateImage(dst_size, IPL_DEPTH_32F, 1);
+						/*テンプレートマッチングのmethod(計算方法)の種類//methodも変えつつ検証が必要
+						CV_TM_SQDIFF		エラー発生
+						CV_TM_CCORR			エラー発生
+						CV_TM_CCOEFF		Correlation coefficient　相関係数
+						CV_TM_SQDIFF_NORMED	SSD(Sum of Squared Difference)　輝度差の二乗和
+						CV_TM_CCORR_NORMED	NCC（Normalized Cross-Correlation）　相互相関の正規化
+						CV_TM_CCOEFF_NORMED	ZNCC（Zero-mean Normalized Cross-Correlation）相関係数の正規化
+						*/
+						cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);
+
+						cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
+
+
+						dst_size_2 = cvSize(src_img->width - tmp_img_2->width + 1, src_img->height - tmp_img_2->height + 1);
+						dst_img_2 = cvCreateImage(dst_size_2, IPL_DEPTH_32F, 1);
+
+						cvMatchTemplate(src_img, tmp_img_2, dst_img_2, CV_TM_CCOEFF_NORMED);
+
+						cvMinMaxLoc(dst_img_2, &min_val_2, &max_val_2, &min_loc_2, &max_loc_2, NULL);
+
+
+						/*150番目の類似度確認用*/
+						if (i == 150){
+							img_ccoeff = dst_img;
+							cvMinMaxLoc(img_ccoeff, &Cmin, &Cmax, &Pmin, &Pmax, NULL);
+						}
+						cvReleaseImage(&dst_img);
+						cvReleaseImage(&dst_img_2);
+						val4files[i] = max_val;
+						val4files_2[i] = max_val_2;
+
+						if (val4files[i] < config_val){//テンプレートと探索対象の類似度がconfig_val 未満
+							//X,Y座標の出力 - for csv
+							sprintf_s(XYpoint[i], ",%02d,%02d", 0, 0);
+							printf("類似度%.1f(%.1f%%未満)", max_val*100.0, config_val*100.0);
+
+							cvRectangle(src_img, max_loc, cvPoint(max_loc.x + tmp_img->width, max_loc.y + tmp_img->height), CV_RGB(255, 0, 0), 2);//赤枠四角を描画
+							cvCircle(src_img, cvPoint(max_loc.x + tmp_img->width / 2, max_loc.y + tmp_img->height / 2), 1, CV_RGB(0, 255, 0), -1, 8);//中心描画
+
+							cvPutText(src_img, sprintClockwPer(i, (int)(val4files[i] * 100.0)), cvPoint(20, 25), &font_w, CV_RGB(255, 255, 255));	//白縁
+							cvPutText(src_img, sprintClockwPer(i, (int)(val4files[i] * 100.0)), cvPoint(20, 25), &font, CV_RGB(200, 0, 0));			//赤文字
+
+							if (val4files_2[i] < config_val){
+								sprintf_s(XYpoint_2[i], ",%02d,%02d", 0, 0);
+								printf("類似度%.1f(%.1f%%未満)\n", max_val_2*100.0, config_val*100.0);
+
+								cvRectangle(src_img, max_loc_2, cvPoint(max_loc_2.x + tmp_img_2->width, max_loc_2.y + tmp_img_2->height), CV_RGB(150, 0, 0), 2);//赤枠四角を描画
+								cvCircle(src_img, cvPoint(max_loc_2.x + tmp_img_2->width / 2, max_loc_2.y + tmp_img_2->height / 2), 1, CV_RGB(0, 150, 0), -1, 8);//中心描画
+
+								cvPutText(src_img, sprintClockwPer(i, (int)(val4files_2[i] * 100.0)), cvPoint(20, 50), &font_w, CV_RGB(255, 255, 255));	//白縁
+								cvPutText(src_img, sprintClockwPer(i, (int)(val4files_2[i] * 100.0)), cvPoint(20, 50), &font, CV_RGB(150, 0, 0));			//赤文字
+							}
+							else{
+								// テンプレートに対応する位置に矩形を描画、中心点も描画
+								cvRectangle(src_img, max_loc_2, cvPoint(max_loc_2.x + tmp_img_2->width, max_loc_2.y + tmp_img_2->height), CV_RGB(0, 0, 150), 2);//青枠四角を描画
+								cvCircle(src_img, cvPoint(max_loc_2.x + tmp_img_2->width / 2, max_loc_2.y + tmp_img_2->height / 2), 1, CV_RGB(0, 150, 0), -1, 8);//中心描画
+								//タイムスタンプ
+
+								cvPutText(src_img, sprintClockwPer(i, (int)(val4files_2[i] * 100.0)), cvPoint(20, 50), &font_w, CV_RGB(150, 150, 150));	//白縁
+								cvPutText(src_img, sprintClockwPer(i, (int)(val4files_2[i] * 100.0)), cvPoint(20, 50), &font, CV_RGB(0, 0, 0));			//黒文字
+								
+								test_2 = (max_loc_2.x + tmp_img_2->width / 2);
+								if (max < test_2){
+								max = test_2;
+								M = i;
+								}
+								//X,Y座標の出力 - for csv
+								sprintf_s(XYpoint_2[i], ",%02d,%02d", (max_loc_2.x + tmp_img_2->width / 2), (max_loc_2.y + tmp_img_2->height / 2));
+								//printf("Effected_%04d.bmp (類似度%.1f%%)\n", i, max_val_2*100.0);
+								printf("類似度%.1f(%.1f%%以上)\n", max_val_2*100.0, config_val*100.0);
+								
+							}
+							sprintf_s(strR, "%s\\処理画像\\Effected_%04d.bmp", FolderName, i);
+							cvSaveImage(strR, src_img);
+							cvShowImage("Camera", src_img);
+							cvWaitKey(1);
+						}
+						else{
+							printf("類似度%.1f(%.1f%%以上)", max_val*100.0, config_val*100.0);
+							// テンプレートに対応する位置に矩形を描画、中心点も描画
+							cvRectangle(src_img, max_loc, cvPoint(max_loc.x + tmp_img->width, max_loc.y + tmp_img->height), CV_RGB(0, 0, 255), 2);//青枠四角を描画
+							cvCircle(src_img, cvPoint(max_loc.x + tmp_img->width / 2, max_loc.y + tmp_img->height / 2), 1, CV_RGB(0, 255, 0), -1, 8);//中心描画
+							//タイムスタンプ
+
+							cvPutText(src_img, sprintClockwPer(i, (int)(val4files[i] * 100.0)), cvPoint(20, 25), &font_w, CV_RGB(255, 255, 255));	//白縁
+							cvPutText(src_img, sprintClockwPer(i, (int)(val4files[i] * 100.0)), cvPoint(20, 25), &font, CV_RGB(0, 0, 0));			//黒文字
+
+							if (val4files_2[i] < config_val){
+									sprintf_s(XYpoint_2[i], ",%02d,%02d", 0, 0);
+									printf("類似度%.1f(%.1f%%未満)\n", max_val_2*100.0, config_val*100.0);
+
+								cvRectangle(src_img, max_loc_2, cvPoint(max_loc_2.x + tmp_img_2->width, max_loc_2.y + tmp_img_2->height), CV_RGB(150, 0, 0), 2);//赤枠四角を描画
+								cvCircle(src_img, cvPoint(max_loc_2.x + tmp_img_2->width / 2, max_loc_2.y + tmp_img_2->height / 2), 1, CV_RGB(0, 150, 0), -1, 8);//中心描画
+
+								cvPutText(src_img, sprintClockwPer(i, (int)(val4files_2[i] * 100.0)), cvPoint(20, 50), &font_w, CV_RGB(255, 255, 255));	//白縁
+								cvPutText(src_img, sprintClockwPer(i, (int)(val4files_2[i] * 100.0)), cvPoint(20, 50), &font, CV_RGB(150, 0, 0));			//赤文字
+							}
+							else{
+								printf("類似度%.1f(%.1f%%以上) 作成\n", max_val_2*100.0, config_val*100.0);
+								num_effected++;
+								// テンプレートに対応する位置に矩形を描画、中心点も描画
+								cvRectangle(src_img, max_loc_2, cvPoint(max_loc_2.x + tmp_img_2->width, max_loc_2.y + tmp_img_2->height), CV_RGB(0, 0, 150), 2);//青枠四角を描画
+								cvCircle(src_img, cvPoint(max_loc_2.x + tmp_img_2->width / 2, max_loc_2.y + tmp_img_2->height / 2), 1, CV_RGB(0, 150, 0), -1, 8);//中心描画
+								//タイムスタンプ
+
+								cvPutText(src_img, sprintClockwPer(i, (int)(val4files_2[i] * 100.0)), cvPoint(20, 50), &font_w, CV_RGB(150, 150, 150));	//白縁
+								cvPutText(src_img, sprintClockwPer(i, (int)(val4files_2[i] * 100.0)), cvPoint(20, 50), &font, CV_RGB(0, 0, 0));			//黒文字
+
+								test = (max_loc.x + tmp_img->width / 2);
+								if (max < test){
+									max = test;
+									M = i;
+								}
+								//X,Y座標の出力 - for csv
+								sprintf_s(XYpoint[i], ",%02d,%02d", (max_loc.x + tmp_img->width / 2), (max_loc.y + tmp_img->height / 2));
+								//printf("Effected_%04d.bmp 作成 (類似度%.1f%%)\n", i, max_val*100.0);
+
+								test_2 = (max_loc_2.x + tmp_img_2->width / 2);
+								if (max < test_2){
+									max = test_2;
+									M = i;
+								}
+								//X,Y座標の出力 - for csv
+								sprintf_s(XYpoint_2[i], ",%02d,%02d", (max_loc_2.x + tmp_img_2->width / 2), (max_loc_2.y + tmp_img_2->height / 2));
+								//printf("Effected_%04d.bmp 作成2 (類似度%.1f%%)\n", i, max_val_2*100.0);
+							}
+							sprintf_s(strR, "%s\\処理画像\\Effected_%04d.bmp", FolderName, i);
+							cvSaveImage(strR, src_img);
+							cvShowImage("Camera", src_img);
+							cvWaitKey(1);
+						}
+					}
+				}
+
+				if (flag_Temp == 0){
+					if (use_src_img){
+						cvReleaseImage(&src_img);
+					}
+					cvReleaseImage(&tmp_img);
+					cvReleaseImage(&tmp_img_2);
+					fprintf(stderr,
+						"マッチング処理が終了しました。\n"
+						"結果データをCSVファイルに書き込みます。\n"
+						);
+
+					//テンプレートマッチの結果データの書き込み
+					sprintf_s(strR, "%s\\数値データ\\結果データ.csv", FolderName);
+					if (error = fopen_s(&file, strR, "w") != 0){
+						printf("%s\n", strT);
+						fprintf(stderr,
+							"結果データに書き込めません.\n"
+							"（Excelなどで開いていると書き込めません.）\n\n"
+							);
+						cvShowImage("Camera", image1);
+						D(key);
+						continue;
+					}
+
+					//結果CSV1行目の記述
+					fprintf(file, "画像ファイル名,t[s],x[pixel],y[pixel],X[meter],Y[meter],類似度,,←１ピクセルが何メートルか？\n");
+
+					if (num_effected != 0){
+						//各行の記述
+						int c = 2; // line number of csv file (start from 2)
+						int flagcsv = 0;
+						double elatime, elatime0;
+						char *ale;
+						for (i = 0; i < myFILECOUNT; i++){
+							if (val4files[i] < config_val){
+								//printf("%d skiped\n",i);
+								//getchar();
+							}
+							//数値データにファイル名など座標、エクセル上での計算式を出力させる
+							else{
+								if (flagcsv == 0){
+									elatime0 = strtod(sprintClock(i), &ale);
+									flagcsv = 1;
+								}
+								char FName[50];
+								sprintf_s(FName, "img_%04d.bmp", i);
+								fprintf(file, FName);	//ファイル名&時刻データを出力
+								elatime = strtod(sprintClock(i), &ale);
+								elatime -= elatime0;
+								fprintf(file, ",%.6lf", elatime);	//１フレームごとの時間座標を数値データ出力
+								fprintf(file, XYpoint[i]);	//XY座標を数値データ出力
+								fprintf(file, ",=(C%d-$C$2)*$H$1,=(D%d-$D$2)*$H$1", c, c);	//xとyを数値データ出力
+								fprintf(file, ",%.6lf", val4files[i]);
+								fprintf(file, "\n");	//改行しないと横1列になる
+								c++;
+							}
+						}
+					}
+					fclose(file);
+
+					//テンプレートマッチの結果データの書き込み
+					sprintf_s(strR, "%s\\数値データ\\結果データ2.csv", FolderName);
+					if (error = fopen_s(&file, strR, "w") != 0){
+						printf("%s\n", strT);
+						fprintf(stderr,
+							"結果データに書き込めません.\n"
+							"（Excelなどで開いていると書き込めません.）\n\n"
+							);
+						cvShowImage("Camera", image1);
+						D(key);
+						continue;
+					}
+
+					//結果CSV1行目の記述
+					fprintf(file, "画像ファイル名,t[s],x[pixel],y[pixel],X[meter],Y[meter],類似度,,←１ピクセルが何メートルか？\n");
+
+					if (num_effected != 0){
+						//各行の記述
+						int c = 2; // line number of csv file (start from 2)
+						int flagcsv = 0;
+						double elatime, elatime0;
+						char *ale;
+						for (i = 0; i < myFILECOUNT; i++){
+							if (val4files_2[i] < config_val){
+								//printf("%d skiped\n",i);
+								//getchar();
+							}
+							//数値データにファイル名など座標、エクセル上での計算式を出力させる
+							else{
+								if (flagcsv == 0){
+									elatime0 = strtod(sprintClock(i), &ale);
+									flagcsv = 1;
+								}
+								char FName[50];
+								sprintf_s(FName, "img_%04d.bmp", i);
+								fprintf(file, FName);	//ファイル名&時刻データを出力
+								elatime = strtod(sprintClock(i), &ale);
+								elatime -= elatime0;
+								fprintf(file, ",%.6lf", elatime);	//１フレームごとの時間座標を数値データ出力
+								fprintf(file, XYpoint_2[i]);	//XY座標を数値データ出力
+								fprintf(file, ",=(C%d-$C$2)*$H$1,=(D%d-$D$2)*$H$1", c, c);	//xとyを数値データ出力
+								fprintf(file, ",%.6lf", val4files_2[i]);
+								fprintf(file, "\n");	//改行しないと横1列になる
+								c++;
+							}
+						}
+					}
+					fclose(file);
+
+					printf("数値データ出力が終了しました.\n");
+
+					printf("\n\n類似度%.1f%%以上の検出結果\n全%d枚中 %d枚検出できました.\n\n", config_val*100.0, num_bmp, num_effected);
+					printf("---------検出数が少ない場合の対処---------\n");
+					printf("※テンプレート画像やConfig.txtを変更し再度Match Templateの実行.\n");
+				}
+				cvShowImage("Camera", image1);
+				D(key);
+				key = 32;
 			}
 			else{
 				flagM = 0;
