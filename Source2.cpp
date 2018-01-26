@@ -251,7 +251,7 @@ int main(int argc, char **argv)
 {
 	int i, test, test_2, max = 0, M;
 	int back_R = 0, back_G = 0, back_B = 0;
-	int kou = 0,temppic = 2;
+	int kou = 0, temppic = 2;
 	int flag_Temp = 0;
 	int Savecount = -1;//判断処理用変数
 	double min_val, max_val;
@@ -267,6 +267,7 @@ int main(int argc, char **argv)
 	CvSize dst_size_2;
 	IplImage *src_img, *dst_img, *dst_img_2;
 	IplImage *img_ccoeff;
+	IplImage *img_ccoeff_C;
 	time_t now_kou = time(NULL);
 	int hour_kou = 0, min_kou = 0, sec_kou = 0;
 
@@ -341,6 +342,7 @@ int main(int argc, char **argv)
 
 	//相互相関係数分布を生成するための変数
 	img_ccoeff = cvCreateImage(cvSize(640, 480), IPL_DEPTH_32F, 1);
+	img_ccoeff_C = cvCreateImage(cvSize(640, 480), IPL_DEPTH_32F, 1);
 	cv::Mat frame;
 	while (1){
 		cap >> frame;
@@ -563,12 +565,6 @@ int main(int argc, char **argv)
 
 					cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
 
-					/*150番目の類似度確認用*/
-					if (i == 150){
-						img_ccoeff = dst_img;
-						cvMinMaxLoc(img_ccoeff, &Cmin, &Cmax, &Pmin, &Pmax, NULL);
-
-					}
 					cvReleaseImage(&dst_img);
 					val4files[i] = max_val;
 
@@ -799,8 +795,90 @@ int main(int argc, char **argv)
 		}
 		//相互相関係数分布
 		if (key == 'C'){
-			cvConvertScale(img_ccoeff, img_ccoeff, 1.0 / Cmax, 0.0);
-			cvShowImage("相互相関係数分布", img_ccoeff);
+			IplImage *tmp_img;
+			char app_C[5];
+			char str_C[_MAX_PATH] = "";
+			int num_C = 0, i_C;
+			printf("何番目の画像の相互相関係数分布を表示しますか？（0～250）\n実行しない場合は'N'\n");
+			scanf_s("%s", app_C, 5);
+			const std::string stra(app_C);
+			if (!strcmp(app_C, "N")){
+				printf("\n相互相関係数分布の表示を実行しません\n");
+				D(key);
+				continue;
+			}
+			else{
+				sscanf_s(stra.c_str(), "%d", &num_C);
+				if (num_C >= 0 && num_C <= 5000){
+					i_C = num_C;
+
+					printf("\n%04d番目の撮影画像を選択しました\n", i_C);
+				}
+				else{
+					printf("\n数字以外が入力されました\n相互相関係数分布の表示を中断します\n");
+					D(key);
+					continue;
+				}
+			}
+
+			//読み込み
+			sprintf_s(strR, "%s\\テンプレート.bmp", FolderName);//template picture as bmp format
+			tmp_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
+
+			//読み込み失敗
+			if (tmp_img == NULL) {
+				fprintf(stderr,
+					"テンプレート画像の読込みに失敗しました.\n"
+					"手順'1'を行ってください.\n\n"
+					);
+				cvShowImage("Camera", image1);
+				D(key);
+				continue;
+			}
+
+
+			sprintf_s(strR, "%s\\撮影画像\\outputpic_%04d.bmp", FolderName, i_C);
+			src_img = cvLoadImage(strR, CV_LOAD_IMAGE_COLOR);
+
+			//読み込み失敗
+			if (src_img == NULL) {
+				printf("撮影画像の読込みに失敗しました.\n");
+			}
+			else{
+				printf("outputpic_%04d.bmpの相互相関係数分布を表示します\n", i_C);
+				// (1)探索画像全体に対して，テンプレートのマッチング値（指定した手法に依存）を計算
+				dst_size = cvSize(src_img->width - tmp_img->width + 1, src_img->height - tmp_img->height + 1);
+				dst_img = cvCreateImage(dst_size, IPL_DEPTH_32F, 1);
+				/*テンプレートマッチングのmethod(計算方法)の種類
+				CV_TM_SQDIFF		エラー発生
+				CV_TM_CCORR			エラー発生
+				CV_TM_CCOEFF		Correlation coefficient　相関係数
+				CV_TM_SQDIFF_NORMED	SSD(Sum of Squared Difference)　輝度差の二乗和
+				CV_TM_CCORR_NORMED	NCC（Normalized Cross-Correlation）　相互相関の正規化
+				CV_TM_CCOEFF_NORMED	ZNCC（Zero-mean Normalized Cross-Correlation）相関係数の正規化
+				*/
+				cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);//methodも変えつつ検証が必要
+
+				cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
+
+				img_ccoeff = cvCreateImage(cvSize(dst_img->height, dst_img->width), IPL_DEPTH_32F, 1);
+				img_ccoeff = dst_img;
+				cvMinMaxLoc(img_ccoeff, &Cmin, &Cmax, &Pmin, &Pmax, NULL);
+
+				cvConvertScale(img_ccoeff, img_ccoeff, 1.0 / Cmax, 0.0);
+
+				img_ccoeff_C = cvCreateImage(cvSize(img_ccoeff->width, img_ccoeff->height), IPL_DEPTH_8U, 1);
+				cvConvertScale(img_ccoeff, img_ccoeff_C, 255, 0);
+
+				sprintf_s(strB, "%s\\相互相関係数分布_%04d.bmp", FolderName, i_C);
+				cvSaveImage(strB, img_ccoeff_C);
+
+			}
+			sprintf_s(str_C, "相互相関係数分布_%04d.bmp", i_C);
+			cvNamedWindow(str_C);
+			cvShowImage(str_C, img_ccoeff_C);
+
+			D(key);
 		}
 		//ディレクトリ作成-----------------------------------
 		if (key == 'd'){ //C:\\Users\\yama\\Documents\\実験フォルダ-webCam
@@ -1058,11 +1136,6 @@ int main(int argc, char **argv)
 
 					cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
 
-					//150番目の類似度確認用
-					if (i == 150){
-						img_ccoeff = dst_img;
-						cvMinMaxLoc(img_ccoeff, &Cmin, &Cmax, &Pmin, &Pmax, NULL);
-					}
 					cvReleaseImage(&dst_img);
 					max_val = max_val;
 					//テンプレートと探索対象の類似度がconfig_val 未満は捨てる
@@ -1331,7 +1404,7 @@ int main(int argc, char **argv)
 		//実験応用動作ここから-----------------------------------------------------------------------------
 		if (key == '@'){
 			char app[10];
-			printf("edge,rgb,color,rgbcolor,mono,op,backのいずれかを入力してください\n実行しない場合は'N'\n");
+			printf("edge,rgb,color,rgbcolor,mono,op,back,temp,tmnのいずれかを入力してください\n実行しない場合は'N'\n");
 			scanf_s("%s", app, 10);
 			const std::string stra(app);
 
@@ -2366,12 +2439,6 @@ int main(int argc, char **argv)
 
 						cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
 
-						/*150番目の類似度確認用*/
-						if (i == 150){
-							img_ccoeff = dst_img;
-							cvMinMaxLoc(img_ccoeff, &Cmin, &Cmax, &Pmin, &Pmax, NULL);
-
-						}
 						cvReleaseImage(&dst_img);
 						val4files[i] = max_val;
 
@@ -2590,11 +2657,6 @@ int main(int argc, char **argv)
 								cvMinMaxLoc(dst_img_2, &min_val_2, &max_val_2, &min_loc_2, &max_loc_2, NULL);
 
 
-								/*150番目の類似度確認用*/
-								if (i == 150){
-									img_ccoeff = dst_img;
-									cvMinMaxLoc(img_ccoeff, &Cmin, &Cmax, &Pmin, &Pmax, NULL);
-								}
 								cvReleaseImage(&dst_img_2);
 								val4files[i] = max_val_2;
 
@@ -2797,11 +2859,6 @@ int main(int argc, char **argv)
 						cvMatchTemplate(src_img, tmp_img, dst_img, CV_TM_CCOEFF_NORMED);//methodも変えつつ検証が必要
 						cvMinMaxLoc(dst_img, &min_val, &max_val, &min_loc, &max_loc, NULL);
 
-						/*150番目の類似度確認用*/
-						if (i == 150){
-							img_ccoeff = dst_img;
-							cvMinMaxLoc(img_ccoeff, &Cmin, &Cmax, &Pmin, &Pmax, NULL);
-						}
 						cvReleaseImage(&dst_img);
 						val4files[i] = max_val;
 						if (val4files[i] < config_val){//テンプレートと探索対象の類似度がconfig_val 未満
