@@ -1,4 +1,4 @@
-﻿// Source2.0 version 2017-09-04
+﻿// Source2.0 version 2018-02-09
 #include <stdio.h>
 #include <assert.h>
 #include <tchar.h>
@@ -290,7 +290,7 @@ int main(int argc, char **argv)
 	int iCAM = 0;
 	int defaultCAM = 0;// ThinkPad カメラ用の設定
 	CvCapture * videoCaptureCAM;
-	//defaultCAMの値設定
+	//defaultCAMの値設定(起動時のカメラ設定)
 	for (iCAM = defaultCAM; iCAM >= 0; iCAM--){
 		videoCaptureCAM = cvCaptureFromCAM(iCAM);
 		if (flagCam == 0){
@@ -342,7 +342,7 @@ int main(int argc, char **argv)
 
 	//相互相関係数分布を生成するための変数
 	img_ccoeff = cvCreateImage(cvSize(640, 480), IPL_DEPTH_32F, 1);
-	img_ccoeff_C = cvCreateImage(cvSize(640, 480), IPL_DEPTH_32F, 1);
+	img_ccoeff_C = cvCreateImage(cvSize(640, 480), IPL_DEPTH_8U, 1);
 	cv::Mat frame;
 	while (1){
 		cap >> frame;
@@ -361,10 +361,17 @@ int main(int argc, char **argv)
 		cvShowImage("Camera", image1);
 
 		//実験基本動作ここから-----------------------------------------------------------------------------
-		//画像の1枚の保存を行う------------------------------------------------------------------------------
+		//画像の1枚の保存を行う（較正用画像とテンプレート画像の作成）----------------------------------------------------
 		if (key == '1'){
 			//	IplImage output = frame;
 			IplImage *output = cvQueryFrame(videoCapture1);
+
+			now_kou = time(NULL);//時間読み込み
+			hour_kou = (now_kou / 3600 + 9) % 24;//時間計算（時）
+			min_kou = now_kou / 60 % 60;//時間計算（分）
+			sec_kou = now_kou % 60;//時間計算（秒）
+			sprintf_s(strB, "%s\\較正_%02d%02d%02d.bmp", FolderName, hour_kou, min_kou, sec_kou);
+			cvSaveImage(strB, output);
 
 			sprintf_s(strB, "%s\\テンプレート.bmp", FolderName);
 			cvSaveImage(strB, output);
@@ -372,14 +379,14 @@ int main(int argc, char **argv)
 			fprintf(stderr, "テンプレート用画像の保存に成功しました\n");
 			D(key);
 		}
-		//較正用画像の保存を行う------------------------------------------------------------------------------
+		//較正用画像の保存・表示を行う------------------------------------------------------------------------------
 		if (key == 'k'){
 			//	IplImage output = frame;
-			IplImage *output = cvQueryFrame(videoCapture1);
-			now_kou = time(NULL);
-			hour_kou = (now_kou / 3600 + 9) % 24;
-			min_kou = now_kou / 60 % 60;
-			sec_kou = now_kou % 60;
+			IplImage *output = cvQueryFrame(videoCapture1);//カメラ読み込み
+			now_kou = time(NULL);//時間読み込み
+			hour_kou = (now_kou / 3600 + 9) % 24;//時間計算（時）
+			min_kou = now_kou / 60 % 60;//時間計算（分）
+			sec_kou = now_kou % 60;//時間計算（秒）
 
 			//sprintf_s(strB, "%s\\較正用画像_%02d%02d%02d_%02d.bmp", FolderName, hour_kou, min_kou, sec_kou, kou);
 			sprintf_s(strB, "%s\\較正_%02d%02d%02d.bmp", FolderName, hour_kou, min_kou, sec_kou);
@@ -397,9 +404,9 @@ int main(int argc, char **argv)
 			sprintf_s(passkou, "実験フォルダ\\較正_%02d%02d%02d.bmp", hour_kou, min_kou, sec_kou);
 			//ShellExecuteで使うためにchar型からTCHAR型に変更
 			TCHAR passkou_TCHAR[50];
-			int pass_i = MultiByteToWideChar(CP_ACP, 0, passkou, -1, NULL, 0);
-			MultiByteToWideChar(CP_ACP, 0, passkou, -1, passkou_TCHAR, pass_i);
-			ShellExecute(NULL, TEXT("open"), TEXT("mspaint"), passkou_TCHAR, NULL, SW_SHOW);
+			int pass_i = MultiByteToWideChar(CP_ACP, 0, passkou, -1, NULL, 0);//文字列読み込み
+			MultiByteToWideChar(CP_ACP, 0, passkou, -1, passkou_TCHAR, pass_i);//文字列変換，代入
+			ShellExecute(NULL, TEXT("open"), TEXT("mspaint"), passkou_TCHAR, NULL, SW_SHOW);//ペイントで開く
 			kou++;
 			printf("%2d枚目の較正用画像を保存しました\n\n", kou);
 			D(key);
@@ -407,10 +414,9 @@ int main(int argc, char **argv)
 		}
 		//ペイントで対象(テンプレート用画像)を開く-------------------------------------------
 		if (key == '2'){
-			//TODO ShellExecute関数とsystem関数でファイルを開いた時の動作がどう変わるか見てみてください
 			printf("テンプレート用画像を開きます\n", kou);
+			//TODO コメントを外してShellExecute関数とsystem関数でファイルを開いた時の動作がどう変わるか見てみてください
 			ShellExecute(NULL, TEXT("open"), TEXT("mspaint"), TEXT("実験フォルダ\\テンプレート.bmp"), NULL, SW_SHOW);
-
 			//system("mspaint \"実験フォルダ\\テンプレート.bmp");
 			D(key);
 			key = 32;
@@ -681,19 +687,22 @@ int main(int argc, char **argv)
 			D(key);
 			key = 32;
 		}
+		//csvファイルを開く
 		if (key == '5'){
-			//TODO ShellExecute関数とsystem関数でファイルを開いた時の動作がどう変わるか見てみてください
 			printf("数値データを出力しています.\n");
+			//TODO コメントを外してShellExecute関数とsystem関数でファイルを開いた時の動作がどう変わるか見てみてください
 			ShellExecute(NULL, TEXT("open"), TEXT("explorer"), TEXT("実験フォルダ\\数値データ\\結果データ.csv"), NULL, SW_SHOW);	//エクスプローラーで対象を開く
 			//system("explorer \"実験フォルダ\\数値データ\\結果データ.csv");		//エクスプローラーで対象を開く
 			D(key);
 			key = 32;
 		}
+		//実験フォルダ内全データコピー
 		else if (key == '6'){
 			system("xcopy /S /C /I /Y \".\\実験フォルダ\" %date:~-5,2%%date:~-2%%time:~0,2%%time:~3,2%%time:~6,2%");
 			D(key);
 			key = 32;
 		}
+		//実験フォルダ内の1部をコピー
 		else if (key == 'f'){
 			int myFILECOUNT = fscanClock();
 			if (myFILECOUNT == -1){
@@ -712,7 +721,7 @@ int main(int argc, char **argv)
 			char str_Asys[_MAX_PATH] = "";
 			char str_Bsys[_MAX_PATH] = "";
 
-			sprintf_s(str_Asys, "%02d%02d%02d", hour_kou, min_kou, sec_kou);
+			sprintf_s(str_Asys, "%02d%02d%02d", hour_kou, min_kou, sec_kou);//コピー先フォルダ名を設定
 			sprintf_s(str_Bsys, "xcopy /C /I /Y .\\実験フォルダ\\テンプレート*.bmp %s\\", str_Asys);
 			system(str_Bsys);
 			sprintf_s(str_Bsys, "xcopy /C /I /Y .\\実験フォルダ\\較正_*.bmp %s\\", str_Asys);
@@ -740,6 +749,7 @@ int main(int argc, char **argv)
 			if (defaultCAM < 0){
 				defaultCAM = 3;
 			}
+			//カメラ探索
 			for (iCAM = defaultCAM; iCAM >= 0; iCAM--){
 				videoCaptureCAM = cvCaptureFromCAM(iCAM);
 				if (flagCam == 0){
@@ -766,7 +776,7 @@ int main(int argc, char **argv)
 			if (!strcmp(aa, "N")){
 			}
 			else{
-				sscanf_s(stra.c_str(), "%d", &numa);
+				sscanf_s(stra.c_str(), "%d", &numa);//整数に変換
 				if (numa >= 0 && numa <= 100){
 					config_val = numa / 100.0;
 					errno_t err = fopen_s(&file_config, "./実験フォルダ/Config.txt", "w+");
@@ -793,13 +803,13 @@ int main(int argc, char **argv)
 			system("explorer \"実験フォルダ");//エクスプローラーで対象を開く
 			D(key);
 		}
-		//相互相関係数分布
+		//相互相関係数分布（類似度のマップ）
 		if (key == 'C'){
 			IplImage *tmp_img;
 			char app_C[5];
 			char str_C[_MAX_PATH] = "";
 			int num_C = 0, i_C;
-			printf("何番目の画像の相互相関係数分布を表示しますか？（0～250）\n実行しない場合は'N'\n");
+			printf("何番目の画像の相互相関係数分布を表示しますか？（0～250）\n実行しない場合は'N'\n");//5桁まで入力可能
 			scanf_s("%s", app_C, 5);
 			const std::string stra(app_C);
 			if (!strcmp(app_C, "N")){
@@ -809,7 +819,7 @@ int main(int argc, char **argv)
 			}
 			else{
 				sscanf_s(stra.c_str(), "%d", &num_C);
-				if (num_C >= 0 && num_C <= 5000){
+				if (num_C >= 0 && num_C <= 5000){//0～5000までの撮影画像に対応
 					i_C = num_C;
 
 					printf("\n%04d番目の撮影画像を選択しました\n", i_C);
@@ -864,11 +874,9 @@ int main(int argc, char **argv)
 				img_ccoeff = cvCreateImage(cvSize(dst_img->height, dst_img->width), IPL_DEPTH_32F, 1);
 				img_ccoeff = dst_img;
 				cvMinMaxLoc(img_ccoeff, &Cmin, &Cmax, &Pmin, &Pmax, NULL);
-
-				cvConvertScale(img_ccoeff, img_ccoeff, 1.0 / Cmax, 0.0);
-
+				
 				img_ccoeff_C = cvCreateImage(cvSize(img_ccoeff->width, img_ccoeff->height), IPL_DEPTH_8U, 1);
-				cvConvertScale(img_ccoeff, img_ccoeff_C, 255, 0);
+				cvConvertScale(img_ccoeff, img_ccoeff_C, 255, 0);//0～255に正規化
 
 				sprintf_s(strB, "%s\\相互相関係数分布_%04d.bmp", FolderName, i_C);
 				cvSaveImage(strB, img_ccoeff_C);
@@ -897,7 +905,6 @@ int main(int argc, char **argv)
 			D(key);
 		}
 		if (key == 'D'){//フォルダの削除と作成
-
 			char dr_app[5];
 			fprintf(stderr,
 				"実験フォルダのデータをリセットしますか？\n実行する場合は'y'か'Y'を入力してください"
@@ -1405,6 +1412,17 @@ int main(int argc, char **argv)
 		if (key == '@'){
 			char app[10];
 			printf("edge,rgb,color,rgbcolor,mono,op,back,temp,tmnのいずれかを入力してください\n実行しない場合は'N'\n");
+			/*
+			edge：エッジ処理
+			rgb：RGB後エッジ処理
+			color：色検出
+			rgbcolor：RGBの範囲で色検出
+			mono：差分（物体抽出）
+			op：オプティカルフロー・モーション履歴
+			back：差分（物体抽出）での背景色の設定
+			temp：2枚目以降のテンプレート画像撮影
+			tmn：複数のテンプレートマッチング
+			*/
 			scanf_s("%s", app, 10);
 			const std::string stra(app);
 
@@ -2288,7 +2306,35 @@ int main(int argc, char **argv)
 				//	IplImage output = frame;
 				IplImage *output = cvQueryFrame(videoCapture1);
 
-				sprintf_s(strB, "%s\\テンプレート%d.bmp", FolderName, temppic);
+				char tm_app[5];
+				printf("何枚目のテンプレート画像を撮影しますか(1~100まで)\n実行しない場合は'N'\n");
+				scanf_s("%s", tm_app, 5);
+				const std::string stra(tm_app);
+
+				int num_tm = 0;
+
+				if (!strcmp(tm_app, "n") || !strcmp(tm_app, "N") || !strcmp(tm_app, "0")){
+					printf("'N'が入力されました。テンプレート画像の撮影を行いません.\n");
+					flag_Temp = 1;
+					continue;
+				}
+				else{
+					sscanf_s(stra.c_str(), "%d", &num_tm);
+					if (num_tm > 0 && num_tm <= 100){
+						printf("数値:%dが入力されました。\n", num_tm);
+					}
+					else{
+						printf("数値が入力されませんでした。\n");
+						continue;
+					}
+				}
+				if (num_tm == 1){
+					sprintf_s(strB, "%s\\テンプレート.bmp", FolderName);
+				}
+				else{
+					sprintf_s(strB, "%s\\テンプレート%d.bmp", FolderName, temppic);
+				}
+				
 				cvSaveImage(strB, output);
 
 				TCHAR temp_TCHAR[50];
@@ -2323,6 +2369,7 @@ int main(int argc, char **argv)
 					}
 					else{
 						printf("数値が入力されませんでした。\n");
+						continue;
 					}
 				}
 
