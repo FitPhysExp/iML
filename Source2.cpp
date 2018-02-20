@@ -19,11 +19,13 @@
 #pragma comment (lib, "opencv_imgproc249d.lib")
 #pragma comment (lib, "opencv_highgui249d.lib")
 #pragma comment (lib, "opencv_video249d.lib")
+#pragma comment(lib,"opencv_objdetect249d.lib")
 #else
 #pragma comment (lib,    "opencv_core249.lib")
 #pragma comment (lib, "opencv_imgproc249.lib")
 #pragma comment (lib, "opencv_highgui249.lib")
 #pragma comment (lib, "opencv_video249.lib")
+#pragma comment(lib,"opencv_objdetect249.lib")
 #endif
 
 #pragma comment(lib, "shlwapi.lib")
@@ -32,6 +34,7 @@
 #define COUNT 1000 // 特徴点の個数
 #define FILECOUNT		250
 #define FILECOUNT_MAX   9999
+#define HAAR_FILE "haarcascade_frontalface_default.xml"//動作させる場所にファイルを置いてください
 //100枚で3秒程度	(30fps)	//これを小さくし過ぎるとプログラムで使用する配列のサイズが変わる
 //バッファサイズが足りず実行できないことがある
 
@@ -1411,17 +1414,18 @@ int main(int argc, char **argv)
 		//実験応用動作ここから-----------------------------------------------------------------------------
 		if (key == '@'){
 			char app[10];
-			printf("edge,rgb,color,rgbcolor,mono,op,back,temp,tmnのいずれかを入力してください\n実行しない場合は'N'\n");
+			printf("edge,rgb,color,rgbcolor,mono,back,temp,tmn,op,kaoのいずれかを入力してください\n実行しない場合は'N'\n");
 			/*
 			edge：エッジ処理
 			rgb：RGB後エッジ処理
 			color：色検出
 			rgbcolor：RGBの範囲で色検出
 			mono：差分（物体抽出）
-			op：オプティカルフロー・モーション履歴
 			back：差分（物体抽出）での背景色の設定
 			temp：2枚目以降のテンプレート画像撮影
 			tmn：複数のテンプレートマッチング
+			op：オプティカルフロー・モーション履歴
+			kao：顔検出
 			*/
 			scanf_s("%s", app, 10);
 			const std::string stra(app);
@@ -2133,174 +2137,6 @@ int main(int argc, char **argv)
 				sprintf_s(strReff, "%s\\処理差分画像\\Effected_", FolderName);
 				flagM = 1;
 			}
-			else if (!strcmp(app, "op")){
-				printf("\nオプティカルフロー、モーション履歴を出力します\nSpace keyで終了します\n");
-				//オプティカルフロー
-				int i, count = COUNT;
-				char status[COUNT];
-				CvPoint2D32f feature_pre[COUNT];	// 浮動小数点数型座標の特徴点
-				CvPoint2D32f feature_now[COUNT];
-				CvCapture* src_op;								// ビデオキャプチャ宣言
-				IplImage *frame_in, *frame_now, *frame_pre, *img_out;	// 画像リソース宣言
-				IplImage *img_tmp1, *img_tmp2, *pyramid_now, *pyramid_pre;
-				double th, h, S = 255, V = 255, r, g, b, max, min;
-
-				// 反復アルゴリズム用終了条件
-				CvTermCriteria criteria;
-				criteria = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
-
-				src_op = cvCaptureFromCAM(defaultCAM); // 映像取得（カメラ映像）
-				if (src_op == NULL){ printf("映像が取得できません。\n"); continue; }
-
-				frame_in = cvQueryFrame(src_op); // 初期フレーム取得
-				frame_now = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 1); // 画像リソース確保
-				frame_pre = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 1);
-				img_out = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 3);
-				img_tmp1 = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_32F, 1);
-				img_tmp2 = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_32F, 1);
-				pyramid_pre = cvCreateImage(cvSize(frame_in->width + 8, frame_in->height / 3),
-					IPL_DEPTH_8U, 1);
-				pyramid_now = cvCreateImage(cvSize(frame_in->width + 8, frame_in->height / 3),
-					IPL_DEPTH_8U, 1);
-				frame_in = cvQueryFrame(src_op);					// 現在フレーム取得
-				cvCvtColor(frame_in, frame_pre, CV_BGR2GRAY);	// グレースケール変換（事前画像準備）
-
-				//モーション履歴
-				double time_s, angle;
-				CvSize size;
-				IplImage *frame, *frame_now_m, *frame_pre_m, *diff;	// 画像変数宣言
-				IplImage *hist, *hist_8, *hist_32, *direction;
-
-				frame = cvQueryFrame(src_op);	// 初期フレーム取得
-				size = cvSize(frame->width, frame->height);	// 入力サイズ取得
-
-				// 画像領域確保・初期化
-				frame_pre_m = cvCreateImage(size, IPL_DEPTH_8U, 1); cvZero(frame_pre_m);
-				frame_now_m = cvCreateImage(size, IPL_DEPTH_8U, 1); cvZero(frame_now_m);
-				diff = cvCreateImage(size, IPL_DEPTH_8U, 1);	// 差分画像
-				hist = cvCreateImage(size, IPL_DEPTH_8U, 3);	// 履歴画像（整数型3チャネル）
-				hist_8 = cvCreateImage(size, IPL_DEPTH_8U, 1);	// 履歴画像（整数型1チャネル）
-				hist_32 = cvCreateImage(size, IPL_DEPTH_32F, 1);	// 履歴画像（浮動小数点数型1チャネル）
-				direction = cvCreateImage(size, IPL_DEPTH_32F, 1);	// 方向画像
-
-				cvNamedWindow("入力映像");
-				cvNamedWindow("オプティカルフロー");
-				cvNamedWindow("モーションテンプレート");
-
-				while (1){
-					//オプティカルフロー
-					frame_in = cvQueryFrame(src_op); if (frame_in == NULL) break;	// 現在フレーム取得
-
-					cvCvtColor(frame_in, frame_now, CV_BGR2GRAY);				// グレースケール変換
-
-					cvGoodFeaturesToTrack(frame_pre, img_tmp1, img_tmp2,		// 特徴点の抽出
-						feature_pre, &count, 0.001, 5, NULL);
-					// オプティカルフロー検出
-					cvCalcOpticalFlowPyrLK(frame_pre, frame_now, pyramid_pre, pyramid_now,
-						feature_pre, feature_now, count, cvSize(10, 10),
-						4, status, NULL, criteria, 0);
-
-					float line_x = 0.0, line_y = 0.0;
-					cvSetZero(img_out);				// 結果画像初期化
-					for (i = 0; i < count; i++){		// オプティカルフロー描画
-						line_x = feature_pre[i].x - feature_now[i].x;
-						line_y = feature_pre[i].y - feature_now[i].y;
-
-						th = atan2(line_y, line_x) / 2;
-						h = (th * 180.0 / M_PI);
-						max = V; min = max - ((S / 255) * max);
-						if (h < 0){
-							h += 180;
-						}
-						h = h * 2;
-
-						if (h > 0 && h <= 60){
-							r = max;
-							g = (h / 60.0) * (max - min) + min;
-							b = min;
-						}
-						else if (h > 60 && h <= 120){
-							r = ((120.0 - h) / 60.0) * (max - min) + min;
-							g = max;
-							b = min;
-						}
-						else if (h > 120 && h <= 180){
-							r = min;
-							g = max;
-							b = ((h - 120.0) / 60.0) * (max - min) + min;
-						}
-						else if (h > 180 && h <= 240){
-							r = min;
-							g = ((240.0 - h) / 60.0) * (max - min) + min;
-							b = max;
-						}
-						else if (h > 240 && h <= 300){
-							r = ((h - 240.0) / 60.0) * (max - min) + min;
-							g = min;
-							b = max;
-						}
-						else if (h > 300 && h <= 360){
-							r = max;
-							g = min;
-							b = ((360.0 - h) / 60.0) * (max - min) + min;
-						}
-
-						cvLine(img_out, cvPointFrom32f(feature_pre[i]),
-							cvPointFrom32f(feature_now[i]), CV_RGB(b, g, r), 1, CV_AA, 0);
-					}
-
-					cvFlip(frame_in, frame_in, 1);
-					cvFlip(img_out, img_out, 1);
-
-					cvShowImage("入力映像", frame_in);
-					cvShowImage("オプティカルフロー", img_out);
-					cvCopy(frame_now, frame_pre);	// 現在画像を事前画像にコピー
-
-					//モーション履歴
-					frame = cvQueryFrame(src_op); if (frame == NULL) break;		// 1フレーム取得
-
-					cvCvtColor(frame, frame_now_m, CV_BGR2GRAY);				// グレースケール変換
-					cvAbsDiff(frame_pre_m, frame_now_m, diff);					// 直前フレームとの差分を抽出
-					cvThreshold(diff, diff, 60, 1, CV_THRESH_BINARY);		// 差分を2値化
-					time_s = (double)clock() / CLOCKS_PER_SEC;				// 現在時間（秒）の取得
-					cvUpdateMotionHistory(diff, hist_32, time_s, 1);		// 履歴画像を作成
-					cvConvertScale(hist_32, hist_8, 255, -(time_s - 1) * 255);	// 0～255にスケーリング
-					cvZero(hist);											// 履歴画像を初期化
-					cvMerge(hist_8, 0, 0, 0, hist);				// 履歴画像を3チャネルカラー画像化
-					cvCalcMotionGradient(hist_32, hist_8, direction, 0.5, 0.05, 3);	// 方向画像作成
-					// 履歴画像と方向画像から全体の動き方向を計算
-					angle = 360 - cvCalcGlobalOrientation(direction, hist_8, hist_32, time_s, 1);
-
-					cvLine(hist, cvPoint(size.width / 2, size.height / 2),		// 動き方向ラインを描画
-						cvPoint(size.width / 2 + int(100 * cos(angle*CV_PI / 180)),
-						size.height / 2 - int(100 * sin(angle*CV_PI / 180))),
-						CV_RGB(255, 0, 0), 3, CV_AA, 0);
-
-					cvFlip(hist, hist, 1);			// 左右反転（鏡面モード）
-					cvCopy(frame_now_m, frame_pre_m);	// 現在フレームを次ループの直前フレームとして保持
-
-					cvShowImage("モーションテンプレート", hist);	// 履歴画像1フレーム表示
-
-					if (cvWaitKey(30) == 32)
-					{
-						printf("\n終了します\n");
-						break;	// Space keyを押した時終了
-					}
-				}
-				// ウィンドウ・キャプチャ・画像リソースの解放
-				cvDestroyWindow("モーションテンプレート");
-				cvDestroyWindow("入力映像");
-				cvDestroyWindow("オプティカルフロー");
-				cvReleaseCapture(&src_op);
-				cvReleaseImage(&frame_now);	cvReleaseImage(&frame_pre);	cvReleaseImage(&img_out);
-				cvReleaseImage(&img_tmp1); cvReleaseImage(&img_tmp2); cvReleaseImage(&pyramid_pre);
-				cvReleaseImage(&pyramid_now);
-				cvReleaseImage(&frame_now_m);	cvReleaseImage(&frame_pre_m);	cvReleaseImage(&diff);
-				cvReleaseImage(&hist);		cvReleaseImage(&hist_8);	cvReleaseImage(&hist_32);
-				cvReleaseImage(&direction);
-				D(key);
-				defaultCAM = defaultCAM;
-			}
 			//画像の1枚の保存を行う------------------------------------------------------------------------------
 			else if (!strcmp(app, "temp")){
 				//	IplImage output = frame;
@@ -2823,6 +2659,234 @@ int main(int argc, char **argv)
 					D(key);
 					key = 32;
 				}
+			}
+			//オプティカルフロー、モーション履歴-------------------------------------------
+			else if (!strcmp(app, "op")){
+				printf("\nオプティカルフロー、モーション履歴を出力します\nSpace keyで終了します\n");
+				//オプティカルフロー
+				int i, count = COUNT;
+				char status[COUNT];
+				CvPoint2D32f feature_pre[COUNT];	// 浮動小数点数型座標の特徴点
+				CvPoint2D32f feature_now[COUNT];
+				CvCapture* src_op;								// ビデオキャプチャ宣言
+				IplImage *frame_in, *frame_now, *frame_pre, *img_out;	// 画像リソース宣言
+				IplImage *img_tmp1, *img_tmp2, *pyramid_now, *pyramid_pre;
+				double th, h, S = 255, V = 255, r, g, b, max, min;
+
+				// 反復アルゴリズム用終了条件
+				CvTermCriteria criteria;
+				criteria = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
+
+				src_op = cvCaptureFromCAM(defaultCAM); // 映像取得（カメラ映像）
+				if (src_op == NULL){ printf("映像が取得できません。\n"); continue; }
+
+				frame_in = cvQueryFrame(src_op); // 初期フレーム取得
+				frame_now = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 1); // 画像リソース確保
+				frame_pre = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 1);
+				img_out = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 3);
+				img_tmp1 = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_32F, 1);
+				img_tmp2 = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_32F, 1);
+				pyramid_pre = cvCreateImage(cvSize(frame_in->width + 8, frame_in->height / 3),
+					IPL_DEPTH_8U, 1);
+				pyramid_now = cvCreateImage(cvSize(frame_in->width + 8, frame_in->height / 3),
+					IPL_DEPTH_8U, 1);
+				frame_in = cvQueryFrame(src_op);					// 現在フレーム取得
+				cvCvtColor(frame_in, frame_pre, CV_BGR2GRAY);	// グレースケール変換（事前画像準備）
+
+				//モーション履歴
+				double time_s, angle;
+				CvSize size;
+				IplImage *frame, *frame_now_m, *frame_pre_m, *diff;	// 画像変数宣言
+				IplImage *hist, *hist_8, *hist_32, *direction;
+
+				frame = cvQueryFrame(src_op);	// 初期フレーム取得
+				size = cvSize(frame->width, frame->height);	// 入力サイズ取得
+
+				// 画像領域確保・初期化
+				frame_pre_m = cvCreateImage(size, IPL_DEPTH_8U, 1); cvZero(frame_pre_m);
+				frame_now_m = cvCreateImage(size, IPL_DEPTH_8U, 1); cvZero(frame_now_m);
+				diff = cvCreateImage(size, IPL_DEPTH_8U, 1);	// 差分画像
+				hist = cvCreateImage(size, IPL_DEPTH_8U, 3);	// 履歴画像（整数型3チャネル）
+				hist_8 = cvCreateImage(size, IPL_DEPTH_8U, 1);	// 履歴画像（整数型1チャネル）
+				hist_32 = cvCreateImage(size, IPL_DEPTH_32F, 1);	// 履歴画像（浮動小数点数型1チャネル）
+				direction = cvCreateImage(size, IPL_DEPTH_32F, 1);	// 方向画像
+
+				cvNamedWindow("入力映像");
+				cvNamedWindow("オプティカルフロー");
+				cvNamedWindow("モーションテンプレート");
+
+				while (1){
+					//オプティカルフロー
+					frame_in = cvQueryFrame(src_op); if (frame_in == NULL) break;	// 現在フレーム取得
+
+					cvCvtColor(frame_in, frame_now, CV_BGR2GRAY);				// グレースケール変換
+
+					cvGoodFeaturesToTrack(frame_pre, img_tmp1, img_tmp2,		// 特徴点の抽出
+						feature_pre, &count, 0.001, 5, NULL);
+					// オプティカルフロー検出
+					cvCalcOpticalFlowPyrLK(frame_pre, frame_now, pyramid_pre, pyramid_now,
+						feature_pre, feature_now, count, cvSize(10, 10),
+						4, status, NULL, criteria, 0);
+
+					float line_x = 0.0, line_y = 0.0;
+					cvSetZero(img_out);				// 結果画像初期化
+					for (i = 0; i < count; i++){		// オプティカルフロー描画
+						line_x = feature_pre[i].x - feature_now[i].x;
+						line_y = feature_pre[i].y - feature_now[i].y;
+
+						th = atan2(line_y, line_x) / 2;
+						h = (th * 180.0 / M_PI);
+						max = V; min = max - ((S / 255) * max);
+						if (h < 0){
+							h += 180;
+						}
+						h = h * 2;
+
+						if (h > 0 && h <= 60){
+							r = max;
+							g = (h / 60.0) * (max - min) + min;
+							b = min;
+						}
+						else if (h > 60 && h <= 120){
+							r = ((120.0 - h) / 60.0) * (max - min) + min;
+							g = max;
+							b = min;
+						}
+						else if (h > 120 && h <= 180){
+							r = min;
+							g = max;
+							b = ((h - 120.0) / 60.0) * (max - min) + min;
+						}
+						else if (h > 180 && h <= 240){
+							r = min;
+							g = ((240.0 - h) / 60.0) * (max - min) + min;
+							b = max;
+						}
+						else if (h > 240 && h <= 300){
+							r = ((h - 240.0) / 60.0) * (max - min) + min;
+							g = min;
+							b = max;
+						}
+						else if (h > 300 && h <= 360){
+							r = max;
+							g = min;
+							b = ((360.0 - h) / 60.0) * (max - min) + min;
+						}
+
+						cvLine(img_out, cvPointFrom32f(feature_pre[i]),
+							cvPointFrom32f(feature_now[i]), CV_RGB(b, g, r), 1, CV_AA, 0);
+					}
+
+					cvFlip(frame_in, frame_in, 1);
+					cvFlip(img_out, img_out, 1);
+
+					cvShowImage("入力映像", frame_in);
+					cvShowImage("オプティカルフロー", img_out);
+					cvCopy(frame_now, frame_pre);	// 現在画像を事前画像にコピー
+
+					//モーション履歴
+					frame = cvQueryFrame(src_op); if (frame == NULL) break;		// 1フレーム取得
+
+					cvCvtColor(frame, frame_now_m, CV_BGR2GRAY);				// グレースケール変換
+					cvAbsDiff(frame_pre_m, frame_now_m, diff);					// 直前フレームとの差分を抽出
+					cvThreshold(diff, diff, 60, 1, CV_THRESH_BINARY);		// 差分を2値化
+					time_s = (double)clock() / CLOCKS_PER_SEC;				// 現在時間（秒）の取得
+					cvUpdateMotionHistory(diff, hist_32, time_s, 1);		// 履歴画像を作成
+					cvConvertScale(hist_32, hist_8, 255, -(time_s - 1) * 255);	// 0～255にスケーリング
+					cvZero(hist);											// 履歴画像を初期化
+					cvMerge(hist_8, 0, 0, 0, hist);				// 履歴画像を3チャネルカラー画像化
+					cvCalcMotionGradient(hist_32, hist_8, direction, 0.5, 0.05, 3);	// 方向画像作成
+					// 履歴画像と方向画像から全体の動き方向を計算
+					angle = 360 - cvCalcGlobalOrientation(direction, hist_8, hist_32, time_s, 1);
+
+					cvLine(hist, cvPoint(size.width / 2, size.height / 2),		// 動き方向ラインを描画
+						cvPoint(size.width / 2 + int(100 * cos(angle*CV_PI / 180)),
+						size.height / 2 - int(100 * sin(angle*CV_PI / 180))),
+						CV_RGB(255, 0, 0), 3, CV_AA, 0);
+
+					cvFlip(hist, hist, 1);			// 左右反転（鏡面モード）
+					cvCopy(frame_now_m, frame_pre_m);	// 現在フレームを次ループの直前フレームとして保持
+
+					cvShowImage("モーションテンプレート", hist);	// 履歴画像1フレーム表示
+
+					if (cvWaitKey(30) == 32)
+					{
+						printf("\n終了します\n");
+						break;	// Space keyを押した時終了
+					}
+				}
+				// ウィンドウ・キャプチャ・画像リソースの解放
+				cvDestroyWindow("モーションテンプレート");
+				cvDestroyWindow("入力映像");
+				cvDestroyWindow("オプティカルフロー");
+				cvReleaseCapture(&src_op);
+				cvReleaseImage(&frame_now);	cvReleaseImage(&frame_pre);	cvReleaseImage(&img_out);
+				cvReleaseImage(&img_tmp1); cvReleaseImage(&img_tmp2); cvReleaseImage(&pyramid_pre);
+				cvReleaseImage(&pyramid_now);
+				cvReleaseImage(&frame_now_m);	cvReleaseImage(&frame_pre_m);	cvReleaseImage(&diff);
+				cvReleaseImage(&hist);		cvReleaseImage(&hist_8);	cvReleaseImage(&hist_32);
+				cvReleaseImage(&direction);
+				D(key);
+				defaultCAM = defaultCAM;
+			}
+			//顔検出-------------------------------------------
+			else if (!strcmp(app, "kao")){
+				CvSeq *objects;
+				CvRect *r;
+				CvCapture* src_kao;						// ビデオキャプチャ宣言
+				IplImage *frame;					// 画像リソース宣言
+				CvHaarClassifierCascade *cascade_kao;	// Haar特徴分類器の宣言
+				CvMemStorage *storage_kao;				// メモリ領域の宣言
+				int kao_R, kao_G, kao_B;
+				cvNamedWindow("顔検出");
+				// 特徴ファイルの読み込み
+				cascade_kao = (CvHaarClassifierCascade *)cvLoad(HAAR_FILE, 0, 0, 0);
+				if (cascade_kao == NULL) {
+					printf("特徴ファイルが読み込めません。\n");
+					cvWaitKey(0);
+					return -1;
+				}
+				storage_kao = cvCreateMemStorage(0);	// メモリ領域の確保
+
+				src_kao = cvCaptureFromCAM(0);			// 映像取得（カメラ映像）
+				if (src_kao == NULL){ printf("映像が取得できません。\n"); cvWaitKey(0); return -1; }
+
+				printf("\n顔検出を行います\nSpace keyで終了します\n");
+
+				while (1){
+					frame = cvQueryFrame(src_kao); if (frame == NULL) break; // 1フレーム取得
+					cvClearMemStorage(storage_kao);			// メモリ領域の初期化
+					// Haar-like特徴分類器による顔検出
+					objects = cvHaarDetectObjects(frame, cascade_kao, storage_kao, 1.1, 3, 0, cvSize(0, 0));
+
+					for (int i = 0; i < (objects ? objects->total : 0); i++) {	// 検出数の繰り返し
+						r = (CvRect *)cvGetSeqElem(objects, i);		// 検出矩形領域の取得
+						if (i == 0){
+							kao_R = 0; kao_G = 255; kao_B = 0;
+						}
+						if (i == 1){
+							kao_R = 255; kao_G = 0; kao_B = 0;
+						}
+						if (i == 2){
+							kao_R = 0; kao_G = 0; kao_B = 225;
+						}
+						else{
+							kao_R = 100 + kao_G / 2; kao_G = 100 + kao_B / 2; kao_B = 100 + kao_R / 2;
+						}
+						cvRectangle(frame, cvPoint(r->x, r->y)			// 検出部に四角枠描画
+							, cvPoint(r->x + r->width, r->y + r->height), CV_RGB(kao_R, kao_G, kao_B), 4);
+					}
+
+					cvShowImage("顔検出", frame);	// 検出結果表示
+
+					if (cvWaitKey(33) == 32) break;	// ESCキーを押した時終了
+				}
+				// ウィンドウ・キャプチャ・メモリの解放
+				cvDestroyWindow("顔検出");
+				cvReleaseCapture(&src_kao);
+				cvReleaseMemStorage(&storage_kao);
+				cvReleaseHaarClassifierCascade(&cascade_kao);
+				D(key);
 			}
 			else{
 				flagM = 0;
