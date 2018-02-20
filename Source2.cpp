@@ -378,7 +378,8 @@ int main(int argc, char **argv)
 
 			sprintf_s(strB, "%s\\テンプレート.bmp", FolderName);
 			cvSaveImage(strB, output);
-
+			kou++;
+			printf("%2d枚目の較正用画像を保存しました\n\n", kou);
 			fprintf(stderr, "テンプレート用画像の保存に成功しました\n");
 			D(key);
 		}
@@ -2838,20 +2839,20 @@ int main(int argc, char **argv)
 				CvHaarClassifierCascade *cascade_kao;	// Haar特徴分類器の宣言
 				CvMemStorage *storage_kao;				// メモリ領域の宣言
 				int kao_R, kao_G, kao_B;
-				cvNamedWindow("顔検出");
 				// 特徴ファイルの読み込み
 				cascade_kao = (CvHaarClassifierCascade *)cvLoad(HAAR_FILE, 0, 0, 0);
 				if (cascade_kao == NULL) {
 					printf("特徴ファイルが読み込めません。\n");
-					cvWaitKey(0);
-					return -1;
+					continue;
 				}
 				storage_kao = cvCreateMemStorage(0);	// メモリ領域の確保
 
 				src_kao = cvCaptureFromCAM(0);			// 映像取得（カメラ映像）
-				if (src_kao == NULL){ printf("映像が取得できません。\n"); cvWaitKey(0); return -1; }
+				if (src_kao == NULL){ printf("映像が取得できません。\n");continue; }
 
 				printf("\n顔検出を行います\nSpace keyで終了します\n");
+
+				cvNamedWindow("顔検出");
 
 				while (1){
 					frame = cvQueryFrame(src_kao); if (frame == NULL) break; // 1フレーム取得
