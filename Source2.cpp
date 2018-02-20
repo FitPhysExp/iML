@@ -1,4 +1,4 @@
-﻿// Source2.0 version 2018-02-09
+﻿// Source2.0 version 2018-02-20
 #include <stdio.h>
 #include <assert.h>
 #include <tchar.h>
@@ -2679,7 +2679,7 @@ int main(int argc, char **argv)
 				criteria = cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 20, 0.03);
 
 				src_op = cvCaptureFromCAM(defaultCAM); // 映像取得（カメラ映像）
-				if (src_op == NULL){ printf("映像が取得できません。\n"); continue; }
+				if (src_op == NULL){ printf("映像が取得できません。\n"); D(key); continue; }
 
 				frame_in = cvQueryFrame(src_op); // 初期フレーム取得
 				frame_now = cvCreateImage(cvGetSize(frame_in), IPL_DEPTH_8U, 1); // 画像リソース確保
@@ -2843,12 +2843,13 @@ int main(int argc, char **argv)
 				cascade_kao = (CvHaarClassifierCascade *)cvLoad(HAAR_FILE, 0, 0, 0);
 				if (cascade_kao == NULL) {
 					printf("特徴ファイルが読み込めません。\n");
+					D(key);
 					continue;
 				}
 				storage_kao = cvCreateMemStorage(0);	// メモリ領域の確保
 
 				src_kao = cvCaptureFromCAM(0);			// 映像取得（カメラ映像）
-				if (src_kao == NULL){ printf("映像が取得できません。\n");continue; }
+				if (src_kao == NULL){ printf("映像が取得できません。\n"); D(key); continue; }
 
 				printf("\n顔検出を行います\nSpace keyで終了します\n");
 
